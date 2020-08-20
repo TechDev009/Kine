@@ -2,7 +2,7 @@
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.3.0-blue.svg)](https://kotlinlang.org) 
 
-A simple and easy HTTP networking library for Kotlin/Android.
+A simple and powerful HTTP networking library for Kotlin/Android.
 
 ## Features
 
@@ -11,18 +11,21 @@ A simple and easy HTTP networking library for Kotlin/Android.
 - [x] Download file with progress
 - [x] Get Image as bitmap from url
 - [x] Response caching in disk 
-- [x] okHttp cache control full support
-- [x] Supports okHttp with ability to write your own httpclient
+- [x] OkHttp cache control full support
+- [x] Supports OkHttp with ability to write your own Httpclient
 - [x] Cancel in-flight request
 - [x] Request timeout
 - [x] Configuration using `Kime`
 - [x] Log manager with option to turn logging off
-- [x] Support response deserialization into POJO/POKO with Gson or Moshi
-- [x] Support for reactive programming via RxJava 2.x
+- [x] Supports response deserialization into POJO/POKO with Gson or Moshi
+- [x] Supports reactive programming via RxJava 2.x
+- [x] Supports kotlin coroutines
 
 ## UpComing Features
 
 - [x] Upload file (multipart/form-data)
+- [x] support for jackson
+- [x] Bitmap caching and auto previous request cancellation for ImageLoading
 - [x] New interceptor api for manipulating request pre execute
 
 ## Installation
