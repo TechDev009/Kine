@@ -1,0 +1,10 @@
+include ':kine-coroutine'
+include ':kine-rxjava2'
+include ':kine-moshi'
+include ':kine-okhttp'
+include ':kine-imageloader'
+include ':kine-android'
+include ':kine-gson'
+include ':kine'
+include ':app'
+rootProject.name = "Kine"
