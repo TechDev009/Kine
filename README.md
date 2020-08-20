@@ -21,12 +21,12 @@ A simple and powerful HTTP networking library for Kotlin/Android.
 - [x] Supports reactive programming via RxJava 2.x
 - [x] Supports kotlin coroutines
 
-## UpComing Features
+## Upcoming Planned Features
 
-- [x] Upload file (multipart/form-data)
-- [x] Support for jackson
-- [x] Bitmap caching and auto previous request cancellation for ImageLoading
-- [x] New interceptor api for manipulating request pre execute
+- Upload file (multipart/form-data)
+- Support for jackson parser
+- Bitmap caching and auto previous request cancellation for ImageLoading
+- New interceptor api for manipulating request pre execute
 
 ## Installation
 
@@ -40,13 +40,13 @@ repositories {
 }
 
 dependencies {
-    compile 'com.kine:kine:<latest-version>' //for JVM
-    compile 'com.kine:kine-android:<latest-version>' //for Android
-    compile 'com.kine:kine-rxjava2:<latest-version>' //for RxJava2 support
-    compile 'com.kine:kine-coroutine:<latest-version>' //for Coroutine support
-    compile 'com.kine:kine-gson:<latest-version>' //for Gson support
-    compile 'com.kine:kine-moshi:<latest-version>' //for Moshi support
-    compile 'com.kine:kine-okhttp:<latest-version>' //for OkHttp support
-    compile 'com.kine:kine-imageloader:<latest-version>' //for Imageloading support
+    compile 'com.kine:kine:1.0.0' //for JVM
+    compile 'com.kine:kine-android:1.0.0' //for Android
+    compile 'com.kine:kine-rxjava2:2.2.19.0' //for RxJava2 support
+    compile 'com.kine:kine-coroutine:1.3.8.0' //for Coroutine support
+    compile 'com.kine:kine-gson:2.8.6.0' //for Gson support
+    compile 'com.kine:kine-moshi:1.9.3' //for Moshi support
+    compile 'com.kine:kine-okhttp:4.8.1.0' //for OkHttp support
+    compile 'com.kine:kine-imageloader:1.0.0' //for Imageloading support
 }
 ```
