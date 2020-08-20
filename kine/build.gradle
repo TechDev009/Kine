@@ -9,7 +9,7 @@ tasks.withType(Javadoc).all {
     enabled = false
 }
 apply from: 'https://raw.githubusercontent.com/govindsa1011/maven-upload/master/bintray.gradle'
-apply from: 'https://raw.githubusercontent.com/govindsa1011/maven-upload/master/publications.gradle'
+apply from: 'https://raw.githack.com/AnkitAgrawal967/Kine/master/publish.gradle'
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"

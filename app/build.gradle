@@ -35,6 +35,7 @@ dependencies {
     implementation project(':kine-android')
     implementation project(':kine-okhttp')
     implementation project(':kine-moshi')
+    implementation project(':kine-gson')
     implementation project(':kine-imageloader')
     implementation project(':kine-rxjava2')
     implementation project(':kine-coroutine')

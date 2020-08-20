@@ -27,12 +27,13 @@ import org.reactivestreams.Subscription
 object NetworkUtils {
     val GET_URL = "users?page=2"
     val POST_URL = "users"
-    fun <T> getRequest(clazz: Class<T>, timeTextView: TextView, responseTextView: TextView) {
+    fun <T> getRequest(clazz: Class<T>, timeTextView: TextView, responseTextView: TextView,
+                       func: ((KineRequest.IBuildOptions) -> KineRequest.IBuildOptions)?=null) {
         val time = System.currentTimeMillis()
-        GET_URL.httpGet().getAs(clazz, { response ->
+        GET_URL.httpGet().apply { func?.invoke(this) }.getAs(clazz, { response ->
             Log.e("response1", response.networkTimeMs.toString() + " " + response.parseTime)
             timeTextView.text = ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
-                    " total time:${System.currentTimeMillis() - time}").trimIndent()
+                    " total time:${System.currentTimeMillis() - time}")
             responseTextView.text = response.response.toString()
         }, { e ->
             e.printStackTrace()
@@ -53,7 +54,7 @@ object NetworkUtils {
                     Log.e("response1", response.networkTimeMs.toString() + " " + response.parseTime)
                     timeTextView.text =
                         ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
-                                " total time:${System.currentTimeMillis() - time}").trimIndent()
+                                " total time:${System.currentTimeMillis() - time}")
                     responseTextView.text = response.response.toString()
                 }
 
@@ -66,6 +67,7 @@ object NetworkUtils {
             })
     }
 
+    @Suppress("NAME_SHADOWING")
     @SuppressLint("SetTextI18n")
     fun <T> getCoroutineRequest(
         clazz: Class<T>,
@@ -80,7 +82,7 @@ object NetworkUtils {
                     Log.e("response1", response.networkTimeMs.toString() + " " + response.parseTime)
                     timeTextView.text =
                         ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
-                                " total time:${System.currentTimeMillis() - time}").trimIndent()
+                                " total time:${System.currentTimeMillis() - time}")
                     responseTextView.text = response.response.toString()
                 }
             }catch (e:Exception){
@@ -109,10 +111,11 @@ object NetworkUtils {
                     Log.e("response1", response.networkTimeMs.toString() + " " + response.parseTime)
                     timeTextView.text =
                         ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
-                                " total time:${System.currentTimeMillis() - time}").trimIndent()
+                                " total time:${System.currentTimeMillis() - time}")
                     responseTextView.text = response.response.toString()
                 }
 
+                @SuppressLint("SetTextI18n")
                 override fun onComplete() {
                     responseTextView.text = "completed"
                 }
@@ -135,10 +138,11 @@ object NetworkUtils {
                     Log.e("response1", response.networkTimeMs.toString() + " " + response.parseTime)
                     timeTextView.text =
                         ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
-                                " total time:${System.currentTimeMillis() - time}").trimIndent()
+                                " total time:${System.currentTimeMillis() - time}")
                     responseTextView.text = response.response.toString()
                 }
 
+                @SuppressLint("SetTextI18n")
                 override fun onComplete() {
                     responseTextView.text = "completed"
                 }
@@ -159,7 +163,7 @@ object NetworkUtils {
         }.getAs(clazz, { response ->
             Log.e("response1", response.networkTimeMs.toString() + " " + response.parseTime)
             timeTextView.text = ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
-                    "total time:${System.currentTimeMillis() - time}").trimIndent()
+                    "total time:${System.currentTimeMillis() - time}")
             responseTextView.text = response.response.toString()
         }, { e ->
             e.printStackTrace()

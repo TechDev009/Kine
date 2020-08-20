@@ -12,11 +12,14 @@ import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import com.kine.Kine
+import com.kine.converters.GsonConverter
+import com.kine.converters.MoshiConverter
 import com.kine.extensions.downloadTo
 import com.kine.imageloader.loadBitmapAndResponseFromUrl
 import com.kine.log.LogLevel
 import com.kine.test.model.CreateUserResponse
 import com.kine.test.model.UserListResponse
+import com.squareup.moshi.Moshi
 import kotlinx.android.synthetic.main.fragment_main.*
 import org.json.JSONObject
 import java.io.File
@@ -44,18 +47,21 @@ class TestFragment : Fragment() {
        send.setOnClickListener {
             when (pos) {
                 0 -> {
-                    NetworkUtils.getRequest(UserListResponse::class.java, parseTime, resp)
+                    NetworkUtils.getRequest(UserListResponse::class.java, parseTime, resp){
+                        it.converter(GsonConverter())
+                    }
                 }
                 1 -> {
                     NetworkUtils.postRequest(CreateUserResponse::class.java, parseTime, resp)
-                    { it -> it }
+                    { it.converter(GsonConverter())}
                 }
                 2 -> {
                     NetworkUtils.getRequest(UserListResponse::class.java, parseTime, resp)
+                    {it.converter(MoshiConverter()) }
                 }
                 3 -> {
                     NetworkUtils.postRequest(CreateUserResponse::class.java, parseTime, resp)
-                    { it -> it }
+                    {it.converter(MoshiConverter()) }
                 }
                 4 -> {
                     NetworkUtils.getRequest(JSONObject::class.java, parseTime, resp)

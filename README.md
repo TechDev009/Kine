@@ -1,6 +1,6 @@
 # Kine
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.3.0-blue.svg)](https://kotlinlang.org) 
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.4.0-blue.svg)](https://kotlinlang.org) 
 
 A simple and powerful HTTP networking library for Kotlin/Android.
 
@@ -24,7 +24,7 @@ A simple and powerful HTTP networking library for Kotlin/Android.
 ## UpComing Features
 
 - [x] Upload file (multipart/form-data)
-- [x] support for jackson
+- [x] Support for jackson
 - [x] Bitmap caching and auto previous request cancellation for ImageLoading
 - [x] New interceptor api for manipulating request pre execute
 
