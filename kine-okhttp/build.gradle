@@ -1,0 +1,20 @@
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+ext {
+    PUBLISH_GROUP_ID = 'com.kine'
+    PUBLISH_ARTIFACT_ID = 'kine-okhttp'
+    PUBLISH_VERSION = '4.8.1.0'
+}
+    tasks.withType(Javadoc).all {
+        enabled = false
+    }
+apply from: 'https://raw.githubusercontent.com/govindsa1011/maven-upload/master/bintray.gradle'
+apply from: 'https://raw.githubusercontent.com/govindsa1011/maven-upload/master/publications.gradle'
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation("com.squareup.okhttp3:okhttp:4.8.1")
+    implementation("com.squareup.okio:okio:2.7.0")
+    implementation project(':kine')
+
+}
