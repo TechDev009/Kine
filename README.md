@@ -17,13 +17,13 @@ A simple and easy HTTP networking library for Kotlin/Android.
 - [x] Request timeout
 - [x] Configuration using `Kime`
 - [x] Log manager with option to turn logging off
-- [x] Support kineResponse deserialization into POJO/POKO with Gson or Moshi
+- [x] Support response deserialization into POJO/POKO with Gson or Moshi
 - [x] Support for reactive programming via RxJava 2.x
 
 ## UpComing Features
 
 - [x] Upload file (multipart/form-data)
-- [x] new interceptor api for manipulating request pre execute
+- [x] New interceptor api for manipulating request pre execute
 
 ## Installation
 
