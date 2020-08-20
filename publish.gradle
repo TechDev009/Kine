@@ -1,0 +1,147 @@
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+version = libraryVersion
+
+
+if (project.hasProperty("android")) {
+    // Android libraries
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from android.sourceSets.main.java.srcDirs
+    }
+
+    task javadoc(type: Javadoc) {
+        source = android.sourceSets.main.java.srcDirs
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    }
+} else {
+    // Java libraries
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+}
+
+// Generate javador
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+// Create the pom configuration with maven-publish plugin.
+def pomConfig = {
+    licenses {
+        license {
+            name licenseName
+            url licenseUrl
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id developerId
+            name developerName
+            email developerEmail
+        }
+    }
+    scm {
+        url gitUrl
+    }
+}
+
+// Get the artifacts
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+// Create the publication with the pom configuration:
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            artifact sourcesJar
+            artifact javadocJar
+            if (project.hasProperty("android")) {
+            artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+            }else{
+            artifact("$buildDir/libs/${project.getName()}-$libraryVersion.jar")
+            }
+            groupId publishedGroupId
+            artifactId artifact
+            version libraryVersion
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+                getDependencies(configurations.compile, dependenciesNode)
+                getDependencies(configurations.api, dependenciesNode)
+                getDependencies(configurations.implementation, dependenciesNode)
+                if (project.hasProperty("android")) {
+                    getDependencies(configurations.releaseImplementation, dependenciesNode)
+                    getDependencies(configurations.debugImplementation, dependenciesNode)
+                    getDependencies(configurations.androidTestAnnotationProcessor, dependenciesNode)
+                    getDependencies(configurations.annotationProcessor, dependenciesNode)
+                }
+                def root = asNode()
+                root.appendNode('description', libraryDescription)
+                root.appendNode('name', libraryName)
+                root.appendNode('url', siteUrl)
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+def getDependencies(config, dependenciesNode) {
+    config.allDependencies.each {
+        if (it.group != null && it.name != null) {
+            if (!hasExistingNode(dependenciesNode, it)) {
+                def dependencyNode = dependenciesNode.appendNode('dependency')
+                dependencyNode.appendNode('groupId', it.group)
+                dependencyNode.appendNode('artifactId', it.name)
+                dependencyNode.appendNode('version', it.version)
+                printAdd(it)
+                if (it.excludeRules.size() > 0) {
+                    def exclusionsNode = dependencyNode.appendNode('exclusions')
+                    printAddExclusions(it)
+                    it.excludeRules.each { rule ->
+                        def exclusionNode = exclusionsNode.appendNode('exclusion')
+                        exclusionNode.appendNode('groupId', rule.group)
+                        if (rule.module != null) {
+                            exclusionNode.appendNode('artifactId', rule.module)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    def dependenciesSize = config.allDependencies.size()
+    if (dependenciesSize > 0) {
+        println "Added Dependencies for configuration: ${config.getName()}"
+        println "Dependencies size: ${dependenciesNode.children().size()}"
+    } else {
+        println "No dependencies found for configuration: ${config.getName()}"
+    }
+}
+
+boolean hasExistingNode(dependenciesNode, it) {
+    for (def item : dependenciesNode.children()) {
+        def itemGroupId = item.groupId[0].value()
+        def itemArtifactId = item.artifactId[0].value()
+        def itemVersion = item.version[0].value()
+        if (it.group == itemGroupId
+                && it.name == itemArtifactId
+                && it.version == itemVersion) {
+            return true
+        }
+    }
+
+    return false
+}
+
+def printAdd(it) {
+    println "Added dependency: '${it.group}:${it.name}:${it.version}'"
+}
+
+def printAddExclusions(it) {
+    println "Added exclusions for: '${it.group}:${it.name}:${it.version}'"
+}
