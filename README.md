@@ -41,14 +41,14 @@ repositories {
 }
 
 dependencies {
-    compile 'com.kine:kine:1.0.0' //for JVM
-    compile 'com.kine:kine-android:1.0.0' //for Android
+    compile 'com.kine:kine:1.0.0.0' //for JVM
+    compile 'com.kine:kine-android:1.0.0.0' //for Android
     compile 'com.kine:kine-rxjava2:2.2.19.0' //for RxJava2 support
     compile 'com.kine:kine-coroutine:1.3.8.0' //for Coroutine support
     compile 'com.kine:kine-gson:2.8.6.0' //for Gson support
-    compile 'com.kine:kine-moshi:1.9.3' //for Moshi support
+    compile 'com.kine:kine-moshi:1.9.3.0' //for Moshi support
     compile 'com.kine:kine-okhttp:4.8.1.0' //for OkHttp support
-    compile 'com.kine:kine-imageloader:1.0.0' //for Imageloading support
+    compile 'com.kine:kine-imageloader:1.0.0.0' //for Imageloading support
 }
 ```
 
