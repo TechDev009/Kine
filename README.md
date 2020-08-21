@@ -97,7 +97,7 @@ val response =  "https://jsonplaceholder.typicode.com/posts".httpGet().responseA
 
 ```kotlin
 "https://example/api/test".httpGet().responseAs(User::class.java,{ response->
-               val list =  Gson().fromJsonArray<Post>(response.body.toString())
+               val user:User =  response.body
            }, { e ->
                e.printStackTrace()
            })
