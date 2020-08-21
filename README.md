@@ -15,7 +15,7 @@ A simple and powerful HTTP networking library for Kotlin/Android.
 - [x] Supports OkHttp with ability to write your own Httpclient
 - [x] Cancel any in-flight request
 - [x] Request timeout with retry policy
-- [x] AppWide Configuration using `Kime` for common Headers , base Url
+- [x] App Wide Configuration using `Kime` with support for common Headers , base Url and for all request
 - [x] Log manager with option to turn logging off for per request and App wide
 - [x] Supports response deserialization into POJO/POKO with Gson or Moshi
 - [x] Supports reactive programming via RxJava 2.x
