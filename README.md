@@ -106,7 +106,7 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
 
 #### Use with RxJava2(requires kine-rxjava2 dependency)
 
-##Single
+#### Single
 
 ```kotlin
 "https://example/api/test".httpGet().toSingle(clazz)
@@ -124,7 +124,7 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
             })
 ```
 
-##Flowable
+#### Flowable
 
 ```kotlin
 "https://example/api/test".httpGet().toFlowable(clazz)
@@ -146,7 +146,7 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
             })
 ```
 
-##Observable
+#### Observable
 
 ```kotlin
  "https://example/api/test".httpGet().toObservable(clazz)
@@ -193,14 +193,14 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
 
 #### Image Loading(requires kine-imageloader dependency)
 
-## Load Bitmap From Url
+#### Load Bitmap From Url
 ```kotlin
   "https://example/api/test/files/abc.png".loadBitmapResponseFromUrl( { response ->
             imageView!!.setImageBitmap(response.body)
         }, { e -> e.printStackTrace() })
 ```
 
-## Load Image from Url to ImageView
+#### Load Image from Url to ImageView
 ```kotlin
   imageView.loadImage("https://example/api/test/files/abc.png",placeHolderResId)
 ```
