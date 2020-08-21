@@ -105,7 +105,7 @@ val response =  "https://jsonplaceholder.typicode.com/posts".httpGet().responseA
 val response =  "https://example/api/test".httpGet().responseAs(User::class.java)
 ```
 
-### RxJava2 (requires kine-rxjava2 dependency)
+### RxJava2 (requires kine-rxjava2 dependency) / RxJava3 (requires kine-rxjava3 dependency)
 
 #### Single
 
