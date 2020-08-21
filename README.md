@@ -54,8 +54,8 @@ dependencies {
 
 ## Usage
 
-Kine requests can be made with KineRequest class or using one of the `String` extension methods.
-If you specify a callback the call is `asynchronous`, if you don't it's `synchronous`.
+Kine requests can be made with `KineRequest` class or using one of the `String` extension methods.
+If you specify a callback the call is asynchronous, if you don't its synchronous.
 
 
 ### Get Json
