@@ -167,7 +167,7 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
             })
 ```
 
-### Use with Coroutine(requires kine-coroutine dependency)
+### Kotlin Coroutine (requires kine-coroutine dependency)
 
 ```kotlin
  GlobalScope.launch(Dispatchers.Main) {
@@ -192,7 +192,7 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
             })
 ```
 
-### Image Loading(requires kine-imageloader dependency)
+### Image Loading (requires kine-imageloader dependency)
 
 #### Load Bitmap From Url
 ```kotlin
