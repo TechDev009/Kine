@@ -93,7 +93,7 @@ val response =  "https://example/api/test".httpGet().responseAs(String::class.ja
 val response =  "https://jsonplaceholder.typicode.com/posts".httpGet().responseAs(JSONArray::class.java)
 ```
 
-### Get Parsed Response With Gson(requires kine-gson dependency)/Moshi(requires kine-moshi dependency)
+### Gson (requires kine-gson dependency) / Moshi (requires kine-moshi dependency)
 
 ```kotlin
 "https://example/api/test".httpGet().responseAs(User::class.java,{ response->
@@ -105,7 +105,7 @@ val response =  "https://jsonplaceholder.typicode.com/posts".httpGet().responseA
 val response =  "https://example/api/test".httpGet().responseAs(User::class.java)
 ```
 
-### Use with RxJava2(requires kine-rxjava2 dependency)
+### RxJava2 (requires kine-rxjava2 dependency)
 
 #### Single
 
