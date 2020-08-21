@@ -53,7 +53,7 @@ class TestFragment : Fragment() {
                 }
                 1 -> {
                     NetworkUtils.postRequest(CreateUserResponse::class.java, parseTime, resp)
-                    { it.converter(GsonConverter())}
+                    { it.converter(GsonConverter()).bodyParams(hashMapOf())}
                 }
                 2 -> {
                     NetworkUtils.getRequest(UserListResponse::class.java, parseTime, resp)
@@ -93,7 +93,10 @@ class TestFragment : Fragment() {
                     NetworkUtils.getRxORequest(UserListResponse::class.java, parseTime, resp)
                 }
                 13 -> {
-                    NetworkUtils.getCoroutineRequest(Bitmap::class.java, parseTime, resp)
+                    NetworkUtils.getCoroutineRequest(UserListResponse::class.java, parseTime, resp)
+                }
+                14 -> {
+                    NetworkUtils.getJsonArrayRequest( parseTime, resp)
                 }
                 else->{
 
@@ -114,7 +117,8 @@ class TestFragment : Fragment() {
         array.add("RX Single Request")
         array.add("RX Flowable Request")
         array.add("RX Observable Request")
-        array.add("coroutine Request")
+        array.add("Coroutine Request")
+        array.add("JsonArray Get Request")
         spinner.adapter = ArrayAdapter(requireActivity(), android.R.layout.simple_list_item_1, array)
         spinner.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {

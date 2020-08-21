@@ -5,7 +5,7 @@ import com.kine.timer.Timer
 
 class AndroidTimer :Timer{
     var time:Long=0
-    override fun new(): Timer {
+    override fun clone(): Timer {
         return AndroidTimer()
     }
 

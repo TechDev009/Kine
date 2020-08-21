@@ -1,18 +1,10 @@
 package com.kine.internal
 
-class DefaultKineClass<T>(clazz: Class<T>) :KineClass<T>(clazz){
+class DefaultKineClass<T>(clazz: Class<T>) : KineClass<T>(clazz) {
 
     override fun isAssignableFrom(t: Class<*>): Boolean {
-        return when {
-            clazz.isAssignableFrom(t) -> {
-                println("Correct type")
-                true
-            }
-            else -> {
-                println("Wrong type")
-                false
-            }
+        return clazz.isAssignableFrom(t).apply {
+           println(if (this) "Correct type" else "Wrong type")
         }
-
     }
 }

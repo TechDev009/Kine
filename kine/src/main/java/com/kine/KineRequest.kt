@@ -72,7 +72,7 @@ open class KineRequest private constructor(builder: Builder) {
         progressListener = builder.progressListener
     }
 
-    fun <F> executeRequest(clazz: KineClass<F>): KineResponse<F>? {
+    fun <F> execute(clazz: KineClass<F>): KineResponse<F>? {
         if (reqTAG == null) {
             reqTAG = requestUrl
             Logger.d("Request", "requestTag not specified using url as tag")
@@ -101,12 +101,12 @@ open class KineRequest private constructor(builder: Builder) {
         }
     }
 
-    fun <F> executeRequest(clazz: KineClass<F>, onSuccess: OnSuccess<F>?, onError: OnError?) {
+    fun <F> execute(clazz: KineClass<F>, onSuccess: OnSuccess<F>?, onError: OnError?) {
         if (reqTAG == null) {
             reqTAG = requestUrl
             Logger.d("Request", "requestTag not specified using url as tag")
         }
-        if (!RequestManager.checkForInternetConnection()) {
+        if (!RequestManager.isConnected()) {
             onError?.invoke(KineError(NoInternetException()))
             return
         }
@@ -124,10 +124,10 @@ open class KineRequest private constructor(builder: Builder) {
                             }
                         }
                     } catch (exception: Throwable) {
-                        if (exception is NoClientFoundException || exception is NoConverterFoundException) {
-                            throw exception
-                        }
                         onCallbackThread {
+                            if (exception is NoClientFoundException || exception is NoConverterFoundException) {
+                                throw exception
+                            }
                             onError?.invoke(KineError(exception))
                         }
                     }
@@ -208,11 +208,7 @@ open class KineRequest private constructor(builder: Builder) {
         fun headers(headers: HashMap<String, String?>?): IBuildOptions
         fun userAgent(userAgent: String): IBuildOptions
         fun contentType(contentType: String): IBuildOptions
-        fun bodyParams(
-            params: String?,
-            contentType: String = ContentType.JSON.toString()
-        ): IBuildOptions
-
+        fun bodyParams(params: String?, contentType: String = ContentType.JSON.toString()): IBuildOptions
         fun addBodyParam(key: String, value: String): IBuildOptions
         fun addEncodedBodyParam(key: String, value: String): IBuildOptions
         fun bodyParams(params: HashMap<String, String>?): IBuildOptions
@@ -229,17 +225,15 @@ open class KineRequest private constructor(builder: Builder) {
         fun onlyFromNetwork(): IBuildOptions
         fun cacheMaxAge(time: Int, timeUnit: TimeUnit): IBuildOptions
         fun priority(priority: Priority): IBuildOptions
-        fun executor(executor: Executor): IBuildOptions
         fun retryPolicy(retryPolicy: RetryPolicy?): IBuildOptions
-        fun <F> getAs(clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError)
-        fun <F> getAs(clazz: KineClass<F>, onSuccess: OnSuccess<F>, onError: OnError)
-        fun <F> getAs(clazz: Class<F>): KineResponse<F>?
-        fun <F> getAs(clazz: KineClass<F>): KineResponse<F>?
-        fun downloadFile(
-            file: File, progressListener: ProgressListener,
-            onSuccess: OnSuccess<File>? = null, onError: OnError
-        )
-        fun downloadFile(file: File, progressListener: ProgressListener)
+        fun <F> responseAs(clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError)
+        fun <F> responseAs(clazz: KineClass<F>, onSuccess: OnSuccess<F>, onError: OnError)
+        @Throws(Throwable::class)
+        fun <F> responseAs(clazz: Class<F>): KineResponse<F>?
+        @Throws(Throwable::class)
+        fun <F> responseAs(clazz: KineClass<F>): KineResponse<F>?
+        fun downloadFile(file: File, progressListener: ProgressListener, onSuccess: OnSuccess<File>? = null, onError: OnError)
+        fun downloadFile(file: File, progressListener: ProgressListener):KineResponse<File>?
         fun build(): KineRequest
     }
 
@@ -318,13 +312,8 @@ open class KineRequest private constructor(builder: Builder) {
                 return this
             }
 
-            override fun executor(executor: Executor): IBuildOptions {
-                this@Builder.executor = executor
-                return this
-            }
-
             override fun contentType(contentType: String): IBuildOptions {
-                this@Builder.requestBody.mediaType = contentType
+                this@Builder.requestBody.setContentType(contentType)
                 return this
             }
 
@@ -336,29 +325,27 @@ open class KineRequest private constructor(builder: Builder) {
              * @return a reference to this Builder
              */
             override fun bodyParams(params: String?, contentType: String): IBuildOptions {
-                this@Builder.requestBody.body = params
-                return contentType(contentType)
+                this@Builder.requestBody.setBody(params,contentType)
+                return this
             }
 
             override fun bodyParams(params: HashMap<String, String>?): IBuildOptions {
-                requestBody.bodyParams = params
+                requestBody.setBody(params)
                 return this
             }
 
             override fun addBodyParam(key: String, value: String): IBuildOptions {
-                requestBody.bodyParams = requestBody.bodyParams ?: hashMapOf()
-                requestBody.bodyParams!![key] = value
+                requestBody.addBodyParam(key,value)
                 return this
             }
 
             override fun addEncodedBodyParam(key: String, value: String): IBuildOptions {
-                requestBody.encodedBodyParams = requestBody.encodedBodyParams ?: hashMapOf()
-                requestBody.encodedBodyParams?.put(key, value)
+                requestBody.addBodyParamEncoded(key, value)
                 return this
             }
 
             override fun encodedBodyParams(params: HashMap<String, String>?): IBuildOptions {
-                requestBody.encodedBodyParams = params
+                requestBody.setBodyEncoded(params)
                 return this
             }
 
@@ -395,21 +382,20 @@ open class KineRequest private constructor(builder: Builder) {
                 this@Builder.retryPolicy = retryPolicy
                 return this
             }
-
-            override fun <F> getAs(clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError) {
-                return getAs(DefaultKineClass(clazz), onSuccess, onError)
+            override fun <F> responseAs(clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError) {
+                 responseAs(DefaultKineClass(clazz), onSuccess, onError)
             }
 
-            override fun <F> getAs(clazz: KineClass<F>, onSuccess: OnSuccess<F>, onError: OnError) {
-                build().executeRequest(clazz, onSuccess, onError)
+            override fun <F> responseAs(clazz: KineClass<F>, onSuccess: OnSuccess<F>, onError: OnError) {
+                build().execute(clazz, onSuccess, onError)
             }
 
-            override fun <F> getAs(clazz: Class<F>): KineResponse<F>? {
-                return build().executeRequest(DefaultKineClass(clazz))
+            override fun <F> responseAs(clazz: Class<F>): KineResponse<F>? {
+                return build().execute(DefaultKineClass(clazz))
             }
 
-            override fun <F> getAs(clazz: KineClass<F>): KineResponse<F>? {
-                return build().executeRequest(clazz)
+            override fun <F> responseAs(clazz: KineClass<F>): KineResponse<F>? {
+                return build().execute(clazz)
             }
 
             override fun downloadFile(
@@ -420,13 +406,13 @@ open class KineRequest private constructor(builder: Builder) {
             ) {
                 this@Builder.file = file
                 this@Builder.progressListener = progressListener
-                build().executeRequest(DefaultKineClass(File::class.java), onSuccess, onError)
+                build().execute(DefaultKineClass(File::class.java), onSuccess, onError)
             }
 
-            override fun downloadFile(file: File, progressListener: ProgressListener) {
+            override fun downloadFile(file: File, progressListener: ProgressListener): KineResponse<File>? {
                 this@Builder.file = file
                 this@Builder.progressListener = progressListener
-                build().executeRequest(DefaultKineClass(File::class.java))
+                return build().execute(DefaultKineClass(File::class.java))
             }
 
             override fun addQueryParam(key: String, value: String): IBuildOptions {
@@ -493,25 +479,25 @@ open class KineRequest private constructor(builder: Builder) {
         }
 
         override fun post(params: String?, contentType: String): IBuildUrl {
-            this@Builder.requestBody.body = params
+            this@Builder.requestBody.setBody(params,contentType)
             method(Method.POST)
             return iBuildUrl
         }
 
         override fun put(params: String?, contentType: String): IBuildUrl {
-            this@Builder.requestBody.body = params
+            this@Builder.requestBody.setBody(params,contentType)
             method(Method.PUT)
             return iBuildUrl
         }
 
         override fun patch(params: String?, contentType: String): IBuildUrl {
-            this@Builder.requestBody.body = params
+            this@Builder.requestBody.setBody(params,contentType)
             method(Method.PATCH)
             return iBuildUrl
         }
 
         override fun delete(params: String?, contentType: String): IBuildUrl {
-            this@Builder.requestBody.body = params
+            this@Builder.requestBody.setBody(params,contentType)
             method(Method.DELETE)
             return iBuildUrl
         }

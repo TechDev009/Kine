@@ -16,6 +16,7 @@ import com.kine.request.Request
 import com.kine.response.KineResponse
 import com.kine.timer.TimerManager
 import java.io.File
+import java.io.InputStream
 import java.util.*
 
 
@@ -64,6 +65,7 @@ internal object RequestManager : IRequestManager {
               }*/
         }
     }
+
     private const val okHttpClientClass = "com.kine.client.OkHttpKineClient"
 
     private fun createDefaultClients(): ArrayList<KineClient>? {
@@ -92,8 +94,9 @@ internal object RequestManager : IRequestManager {
             if (request.kineClient.canHandleRequest(request.data.url, request.data.method)) {
                 return enqueueRequest(request.kineClient, request, clazz)
             } else {
-                throw IllegalArgumentException(
-                    "the provided kineClient cannot handle " + "this type of request, please set kineClient that can " +
+                throw MisMatchClientException(
+                    "the provided kineClient cannot handle " +
+                            "this type of request, please set kineClient that can " +
                             "handle this type of request" + " " + "by Changing the kineClient.canHandleRequest(url, method) method"
                 )
             }
@@ -105,10 +108,7 @@ internal object RequestManager : IRequestManager {
             it.canHandleRequest(request.data.url, request.data.method).apply {
                 return enqueueRequest(it, request, clazz)
             }
-        } ?: throw NoClientFoundException(
-            "no kineClient found that can handle " + "this type of request, please set one at least request manager that can " +
-                    "handle this type of request" + " " + "through Kine class"
-        )
+        } ?: throw MisMatchClientException()
         return null
     }
 
@@ -155,6 +155,9 @@ internal object RequestManager : IRequestManager {
             clazz.isAssignableFrom(File::class.java) -> {
                 File::class.java
             }
+            clazz.isAssignableFrom(InputStream::class.java) -> {
+                InputStream::class.java
+            }
             else -> {
                 String::class.java
             }
@@ -164,12 +167,14 @@ internal object RequestManager : IRequestManager {
     }
 
     private fun <T, F> parseResponse(
-        kineResponse: KineResponse<T>, request: Request, clazz: KineClass<F>): KineResponse<F>? {
+        kineResponse: KineResponse<T>, request: Request, clazz: KineClass<F>
+    ): KineResponse<F>? {
         if (kineResponse.response == null) {
             throw NullResponseException()
         }
         val timer = timerManager.start()
-        val responseValue: F = parseDataToModel(kineResponse.response, request, request.converter, clazz)
+        val responseValue: F =
+            parseDataToModel(kineResponse.response, request, request.converter, clazz)
         val parseResponse = KineResponse(
             responseValue, kineResponse.headers, kineResponse.statusCode,
             kineResponse.networkTimeMs, kineResponse.loadedFrom
@@ -195,7 +200,7 @@ internal object RequestManager : IRequestManager {
                 ?: throw MisMatchConverterException()
         }
         if (converters.isNullOrEmpty()) {
-                throw NoConverterFoundException()
+            throw NoConverterFoundException()
         }
         return converters!!.firstResultOrNull<Converter, T> {
             it.convert(response, request, clazz.clazz)
@@ -227,7 +232,8 @@ internal object RequestManager : IRequestManager {
         this.connectionChecker = connectionChecker
     }
 
-    fun checkForInternetConnection(): Boolean {
+    // if there are no connectionChecker don't check for network connection and just return true
+    fun isConnected(): Boolean {
         return connectionChecker == null || connectionChecker!!.isConnected()
     }
 

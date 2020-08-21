@@ -17,29 +17,29 @@ fun String.httpGet(): KineRequest.IBuildOptions {
 fun String.httpHead(): KineRequest.IBuildOptions {
     return KineRequest.head().url(this)
 }
-fun String.httpPost(params : String?): KineRequest.IBuildOptions {
+fun String.httpPost(params : String?=null): KineRequest.IBuildOptions {
     return KineRequest.post(params).url(this)
 }
-fun String.httpDelete(params : String?): KineRequest.IBuildOptions {
+fun String.httpDelete(params : String?=null): KineRequest.IBuildOptions {
     return KineRequest.delete(params).url(this)
 }
-fun String.httpPut(params : String?): KineRequest.IBuildOptions {
+fun String.httpPut(params : String?=null): KineRequest.IBuildOptions {
     return KineRequest.put(params).url(this)
 }
-fun String.httpPatch(params : String?): KineRequest.IBuildOptions {
+fun String.httpPatch(params : String?=null): KineRequest.IBuildOptions {
     return KineRequest.patch(params).url(this)
 }
 fun String.httpMethod(method : Int,params : String?=null): KineRequest.IBuildOptions {
     return KineRequest.method(method).url(this).bodyParams(params)
 }
 fun <F> String.httpGetAs(clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError) {
-    return this.httpGet().getAs(clazz,onSuccess, onError)
+    return this.httpGet().responseAs(clazz,onSuccess, onError)
 }
 fun <F> String.httpPostAs(params : String?,clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError){
-    return this.httpPost(params).getAs(clazz,onSuccess, onError)
+    return this.httpPost(params).responseAs(clazz,onSuccess, onError)
 }
 fun <F> KineRequest.IBuildOptions.httpGetAsString(onSuccess: OnSuccess<String>, onError: OnError){
-    return getAs(String::class.java,onSuccess, onError)
+    return responseAs(String::class.java,onSuccess, onError)
 }
 
 fun String.formatUrl(vararg values:Any): String {

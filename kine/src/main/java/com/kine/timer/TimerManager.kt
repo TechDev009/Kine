@@ -4,7 +4,7 @@ object TimerManager {
     private var timer: Timer = SimpleTimer()
 
     fun start(): Timer {
-        return timer.new().apply { start()}
+        return timer.clone().apply { start()}
     }
 
     fun time(): Long {

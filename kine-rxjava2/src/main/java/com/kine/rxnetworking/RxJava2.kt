@@ -13,7 +13,7 @@ fun <F> KineRequest.IBuildOptions.toSingle(callback:Class<F>): Single<KineRespon
 }
 fun <F> KineRequest.toSingle(callback:Class<F>): Single<KineResponse<F>?> {
     return Single.fromCallable {
-        this.executeRequest(DefaultKineClass(callback))
+        this.execute(DefaultKineClass(callback))
     }
 }
 fun <F> KineRequest.IBuildOptions.toFlowable(callback:Class<F>): Flowable<KineResponse<F>?> {
@@ -21,7 +21,7 @@ fun <F> KineRequest.IBuildOptions.toFlowable(callback:Class<F>): Flowable<KineRe
 }
 fun <F> KineRequest.toFlowable(callback:Class<F>): Flowable<KineResponse<F>?> {
     return Flowable.fromCallable {
-        this.executeRequest(DefaultKineClass(callback))
+        this.execute(DefaultKineClass(callback))
     }
 }
 fun <F> KineRequest.IBuildOptions.toObservable(callback:Class<F>): Observable<KineResponse<F>?> {
@@ -29,6 +29,6 @@ fun <F> KineRequest.IBuildOptions.toObservable(callback:Class<F>): Observable<Ki
 }
 fun <F> KineRequest.toObservable(callback:Class<F>): Observable<KineResponse<F>?> {
     return Observable.fromCallable {
-        this.executeRequest(DefaultKineClass(callback))
+        this.execute(DefaultKineClass(callback))
     }
 }

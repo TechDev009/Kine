@@ -2,7 +2,7 @@ package com.kine.timer
 
 class SimpleTimer:Timer {
     var time:Long=0
-    override fun new(): Timer {
+    override fun clone(): Timer {
        return SimpleTimer()
     }
 

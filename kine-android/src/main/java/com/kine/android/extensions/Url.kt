@@ -68,12 +68,12 @@ fun String.patch(jsonObject : JSONObject?): KineRequest.IBuildOptions {
     return KineRequest.patch(jsonObject?.toString()).url(this)
 }
 fun <F> String.postAs(jsonObject : JSONObject?,clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError){
-    return this.post(jsonObject).getAs(clazz,onSuccess, onError)
+    return this.post(jsonObject).responseAs(clazz,onSuccess, onError)
 }
 
 fun <F> KineRequest.IBuildOptions.getAsJson(onSuccess: OnSuccess<JSONObject>, onError: OnError){
-    return this.converter(JsonConverter()).getAs(JSONObject::class.java,onSuccess, onError)
+    return this.converter(JsonConverter()).responseAs(JSONObject::class.java,onSuccess, onError)
 }
 fun <F> KineRequest.IBuildOptions.getAsJsonArray(onSuccess: OnSuccess<JSONArray>, onError: OnError){
-    return this.converter(JsonConverter()).getAs(JSONArray::class.java,onSuccess, onError)
+    return this.converter(JsonConverter()).responseAs(JSONArray::class.java,onSuccess, onError)
 }

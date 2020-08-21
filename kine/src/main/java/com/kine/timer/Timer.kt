@@ -2,7 +2,7 @@ package com.kine.timer
 
 interface Timer {
 
-    fun new():Timer
+    fun clone():Timer
 
     fun start()
 

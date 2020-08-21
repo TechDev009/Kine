@@ -15,7 +15,7 @@ fun ImageView.loadImage(url:String,@DrawableRes placeHolder:Int?=null){
         setImageResource(it)
     }
     url.httpGet().converter(BitmapConverter())
-        .getAs(BitmapKineClass(), { response ->
+        .responseAs(BitmapKineClass(), { response ->
             setImageBitmap(response.response)
         }, onError = {error ->
             error.printStackTrace()
@@ -23,7 +23,7 @@ fun ImageView.loadImage(url:String,@DrawableRes placeHolder:Int?=null){
 }
 inline fun String.loadBitmapFromUrl(crossinline onSuccess: (Bitmap)->Unit,crossinline onError: OnError={ _ ->}){
     this.httpGet().converter(BitmapConverter())
-        .getAs(BitmapKineClass(), { response ->
+        .responseAs(BitmapKineClass(), { response ->
             response.response?.apply {
                 onSuccess(this)
             }?: onError(KineError( NullResponseException("null bitmap")))
@@ -34,7 +34,7 @@ inline fun String.loadBitmapFromUrl(crossinline onSuccess: (Bitmap)->Unit,crossi
 }
 inline fun String.loadBitmapAndResponseFromUrl(crossinline onSuccess: (KineResponse<Bitmap>)->Unit, crossinline onError: OnError={_ ->}){
     this.httpGet().converter(BitmapConverter())
-        .getAs(BitmapKineClass(), { response ->
+        .responseAs(BitmapKineClass(), { response ->
                 onSuccess(response)
         }, onError = {error ->
             error.printStackTrace()
