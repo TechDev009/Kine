@@ -7,16 +7,13 @@ import com.google.gson.Gson
 import com.kine.KineRequest
 import com.kine.android.extensions.post
 import com.kine.converters.extensions.fromJsonArray
-import com.kine.converters.extensions.getGsonArrayType
 import com.kine.coroutine.responseAsCoroutine
 import com.kine.extensions.httpGet
-import com.kine.extensions.httpPost
 import com.kine.response.KineResponse
 import com.kine.rxnetworking.toFlowable
 import com.kine.rxnetworking.toObservable
 import com.kine.rxnetworking.toSingle
 import com.kine.test.model.Post
-import com.kine.test.model.User
 import io.reactivex.FlowableSubscriber
 import io.reactivex.Observer
 import io.reactivex.SingleObserver

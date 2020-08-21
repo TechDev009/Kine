@@ -50,3 +50,27 @@ dependencies {
     compile 'com.kine:kine-imageloader:1.0.0' //for Imageloading support
 }
 ```
+
+## Usage
+
+Kine requests can be made with KineRequest class or using one of the `String` extension methods.
+If you specify a callback the call is `asynchronous`, if you don't it's `synchronous`.
+
+#### Asynchronous Example
+
+```kotlin
+
+     "https://jsonplaceholder.typicode.com/posts".httpGet().responseAs(JSONArray::class.java,{ response->
+               val list =  Gson().fromJsonArray<Post>(response.response.toString())
+           }, { e ->
+               e.printStackTrace()
+           })
+
+     
+```
+#### Synchronous Example
+```kotlin
+
+val response =  "https://jsonplaceholder.typicode.com/posts".httpGet().responseAs(JSONArray::class.java)
+
+```
