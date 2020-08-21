@@ -205,3 +205,18 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
 ```kotlin
   imageView.loadImage("https://example/api/test/files/abc.png",placeHolderResId)
 ```
+
+#### Cancelling request
+
+#### Appwide Cancel
+```kotlin
+ Kine.cancelAllRequests() // cancels all request with clients set with Kine
+ Kine.cancelAllRequests(tag) // cancels all request with that tag with clients set with Kine(note passing null will cancel all request)
+```
+
+#### Individual Request Client Cancel
+```kotlin
+  val client = OkHttpKineClient()
+  "url".httpGet().client(client).responseAs(User::class.java)
+  client.cancelAllRequests() // behaves same as above Kine cancel methods
+```
