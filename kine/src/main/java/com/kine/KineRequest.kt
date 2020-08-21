@@ -4,6 +4,7 @@ package com.kine
 import com.kine.cache.KineCacheControl
 import com.kine.client.KineClient
 import com.kine.converters.Converter
+import com.kine.converters.FileDownloadConverter
 import com.kine.exceptions.NoClientFoundException
 import com.kine.exceptions.NoConverterFoundException
 import com.kine.exceptions.NoInternetException
@@ -117,7 +118,7 @@ open class KineRequest private constructor(builder: Builder) {
                     try {
                         val response = RequestManager.executeRequest(request, clazz)
                         onCallbackThread {
-                            if (response?.response != null) {
+                            if (response?.body != null) {
                                 onSuccess?.invoke(response)
                             } else {
                                 onError?.invoke(KineError(NullResponseException()))
@@ -406,12 +407,14 @@ open class KineRequest private constructor(builder: Builder) {
             ) {
                 this@Builder.file = file
                 this@Builder.progressListener = progressListener
+                converter(FileDownloadConverter())
                 build().execute(DefaultKineClass(File::class.java), onSuccess, onError)
             }
 
             override fun downloadFile(file: File, progressListener: ProgressListener): KineResponse<File>? {
                 this@Builder.file = file
                 this@Builder.progressListener = progressListener
+                converter(FileDownloadConverter())
                 return build().execute(DefaultKineClass(File::class.java))
             }
 
@@ -446,8 +449,6 @@ open class KineRequest private constructor(builder: Builder) {
                 logLevel = level
                 return this
             }
-
-
 
             override fun tag(tag: String): IBuildOptions {
                 reqTAG = tag

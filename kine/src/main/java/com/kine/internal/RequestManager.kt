@@ -86,7 +86,7 @@ internal object RequestManager : IRequestManager {
             val result = interceptors?.firstResultOrNull {
                 it.intercept(request, clazz.clazz)
             }
-            if (result?.response != null) {
+            if (result?.body != null) {
                 return result
             }
         }
@@ -169,17 +169,17 @@ internal object RequestManager : IRequestManager {
     private fun <T, F> parseResponse(
         kineResponse: KineResponse<T>, request: Request, clazz: KineClass<F>
     ): KineResponse<F>? {
-        if (kineResponse.response == null) {
+        if (kineResponse.body == null) {
             throw NullResponseException()
         }
         val timer = timerManager.start()
         val responseValue: F =
-            parseDataToModel(kineResponse.response, request, request.converter, clazz)
+            parseDataToModel(kineResponse.body, request, request.converter, clazz)
         val parseResponse = KineResponse(
             responseValue, kineResponse.headers, kineResponse.statusCode,
             kineResponse.networkTimeMs, kineResponse.loadedFrom
         )
-        if (parseResponse.response != null) {
+        if (parseResponse.body != null) {
             parseResponse.parseTime = timer.stop()
             return parseResponse
         } else {

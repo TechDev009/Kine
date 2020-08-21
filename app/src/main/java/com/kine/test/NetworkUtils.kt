@@ -5,7 +5,7 @@ import android.util.Log
 import android.widget.TextView
 import com.google.gson.Gson
 import com.kine.KineRequest
-import com.kine.android.extensions.post
+import com.kine.android.extensions.httpPost
 import com.kine.converters.extensions.fromJsonArray
 import com.kine.coroutine.responseAsCoroutine
 import com.kine.extensions.httpGet
@@ -38,7 +38,7 @@ object NetworkUtils {
             Log.e("response1", response.networkTimeMs.toString() + " " + response.parseTime)
             timeTextView.text = ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
                     " total time:${System.currentTimeMillis() - time}")
-            responseTextView.text = response.response.toString()
+            responseTextView.text = response.body.toString()
         }, { e ->
             e.printStackTrace()
             responseTextView.text = e.message()
@@ -51,7 +51,7 @@ object NetworkUtils {
             timeTextView.text = ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
                     " total time:${System.currentTimeMillis() - time}")
 
-            responseTextView.text =  Gson().fromJsonArray<Post>(response.response.toString())[0].title
+            responseTextView.text =  Gson().fromJsonArray<Post>(response.body.toString())[0].title
         }, { e ->
             e.printStackTrace()
             responseTextView.text = e.message()
@@ -71,7 +71,7 @@ object NetworkUtils {
                     timeTextView.text =
                         ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
                                 " total time:${System.currentTimeMillis() - time}")
-                    responseTextView.text = response.response.toString()
+                    responseTextView.text = response.body.toString()
                 }
 
                 @SuppressLint("SetTextI18n")
@@ -81,6 +81,7 @@ object NetworkUtils {
                 }
 
             })
+
     }
 
     @Suppress("NAME_SHADOWING")
@@ -99,7 +100,7 @@ object NetworkUtils {
                     timeTextView.text =
                         ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
                                 " total time:${System.currentTimeMillis() - time}")
-                    responseTextView.text = response.response.toString()
+                    responseTextView.text = response.body.toString()
                 }
             }catch (e:Exception){
                 e.printStackTrace()
@@ -128,7 +129,7 @@ object NetworkUtils {
                     timeTextView.text =
                         ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
                                 " total time:${System.currentTimeMillis() - time}")
-                    responseTextView.text = response.response.toString()
+                    responseTextView.text = response.body.toString()
                 }
 
                 @SuppressLint("SetTextI18n")
@@ -155,7 +156,7 @@ object NetworkUtils {
                     timeTextView.text =
                         ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
                                 " total time:${System.currentTimeMillis() - time}")
-                    responseTextView.text = response.response.toString()
+                    responseTextView.text = response.body.toString()
                 }
 
                 @SuppressLint("SetTextI18n")
@@ -174,13 +175,13 @@ object NetworkUtils {
         func: (KineRequest.IBuildOptions) -> KineRequest.IBuildOptions
     ) {
         val time = System.currentTimeMillis()
-        POST_URL.post(JSONObject().put("name", "yodo").put("job", "test")).apply {
+        POST_URL.httpPost(JSONObject().put("name", "yodo").put("job", "test")).apply {
             func(this)
         }.responseAs(clazz, { response ->
             Log.e("response1", response.networkTimeMs.toString() + " " + response.parseTime)
             timeTextView.text = ("time:${response.networkTimeMs} parse time:${response.parseTime} " +
                     "total time:${System.currentTimeMillis() - time}")
-            responseTextView.text = response.response.toString()
+            responseTextView.text = response.body.toString()
         }, { e ->
             e.printStackTrace()
             responseTextView.text = e.message()

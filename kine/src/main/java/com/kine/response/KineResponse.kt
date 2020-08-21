@@ -8,7 +8,7 @@ import java.util.*
 class KineResponse<T> {
     /**  data from this response.  */
     @JvmField
-    val response: T?
+    val body: T?
 
     /** The HTTP status code.  */
     @JvmField
@@ -37,7 +37,7 @@ class KineResponse<T> {
         networkTimeMs: Long,
         loadedFrom: Int
     ) {
-        this.response = response
+        this.body = response
         this.headers = headers
         this.statusCode = statusCode
         this.networkTimeMs = networkTimeMs
@@ -46,7 +46,7 @@ class KineResponse<T> {
     }
 
     constructor(response: T, loadedFrom: Int) {
-        this.response = response
+        this.body = response
         headers = HashMap()
         statusCode = 200
         networkTimeMs = 0
@@ -55,7 +55,7 @@ class KineResponse<T> {
     }
 
     constructor(loadedFrom: Int) {
-        response = null
+        body = null
         headers = HashMap()
         statusCode = 200
         networkTimeMs = 0

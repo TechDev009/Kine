@@ -1,6 +1,5 @@
 package com.kine.test
 
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -15,11 +14,11 @@ import com.kine.Kine
 import com.kine.converters.GsonConverter
 import com.kine.converters.MoshiConverter
 import com.kine.extensions.downloadTo
-import com.kine.imageloader.loadBitmapAndResponseFromUrl
+import com.kine.imageloader.extensions.loadBitmapResponseFromUrl
+import com.kine.imageloader.extensions.loadImage
 import com.kine.log.LogLevel
 import com.kine.test.model.CreateUserResponse
 import com.kine.test.model.UserListResponse
-import com.squareup.moshi.Moshi
 import kotlinx.android.synthetic.main.fragment_main.*
 import org.json.JSONObject
 import java.io.File
@@ -146,7 +145,7 @@ class TestFragment : Fragment() {
                 Log.e("response1", response.networkTimeMs.toString() + " " + response.parseTime)
             parseTime!!.text = ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
                         " total time:${System.currentTimeMillis() - time}").trimIndent()
-            resp!!.text ="saved as "+ response.response?.path?:"null"
+            resp!!.text ="saved as "+ response.body?.path?:"null"
             }, { e ->
             e.printStackTrace()
             activity?.runOnUiThread {
@@ -157,12 +156,12 @@ class TestFragment : Fragment() {
 
     private fun testRequest() {
         val time = System.currentTimeMillis()
-        "http://i.imgur.com/2M7Hasn.png".loadBitmapAndResponseFromUrl( { response ->
+        "http://i.imgur.com/2M7Hasn.png".loadBitmapResponseFromUrl( { response ->
             Log.e("response1", response.networkTimeMs.toString() + " " + response.parseTime)
             parseTime!!.text = ("time:${response.networkTimeMs} parse time:${response.parseTime}" +
                     " total time:${System.currentTimeMillis() - time}").trimIndent()
-            resp!!.text = response.response.toString()
-            image!!.setImageBitmap(response.response)
+            resp!!.text = response.body.toString()
+            image!!.setImageBitmap(response.body)
         }, { e ->
             resp.text = e.message()
         })

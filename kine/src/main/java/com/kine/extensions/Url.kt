@@ -2,6 +2,7 @@ package com.kine.extensions
 
 import com.kine.KineRequest
 import com.kine.converters.FileDownloadConverter
+import com.kine.response.KineResponse
 import com.kine.response.OnError
 import com.kine.response.OnSuccess
 import java.io.File
@@ -35,6 +36,12 @@ fun String.httpMethod(method : Int,params : String?=null): KineRequest.IBuildOpt
 fun <F> String.httpGetAs(clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError) {
     return this.httpGet().responseAs(clazz,onSuccess, onError)
 }
+fun <F> String.httpGetAs(clazz: Class<F>): KineResponse<F>? {
+    return this.httpGet().responseAs(clazz)
+}
+fun <F> String.httpPostAs(params : String?,clazz: Class<F>): KineResponse<F>? {
+    return this.httpPost(params).responseAs(clazz)
+}
 fun <F> String.httpPostAs(params : String?,clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError){
     return this.httpPost(params).responseAs(clazz,onSuccess, onError)
 }
@@ -47,7 +54,7 @@ fun String.formatUrl(vararg values:Any): String {
 }
 
 fun File.downloadFrom(url:String, progressListener: ProgressListener,onSuccess: OnSuccess<File>?=null, onError: OnError?=null) {
-    url.httpGet().converter(FileDownloadConverter()).downloadFile(this,progressListener, { response ->
+    url.httpGet().downloadFile(this,progressListener, { response ->
          onSuccess?.invoke(response)
         }, onError = {kineError ->
         kineError.exception.printStackTrace()

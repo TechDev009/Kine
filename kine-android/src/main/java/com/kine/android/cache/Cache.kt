@@ -47,7 +47,7 @@ interface Cache {
         val loadedFrom: Int
 
         init {
-            data = kineResponse.response
+            data = kineResponse.body
             headers = kineResponse.headers
             networkTimeMs = kineResponse.networkTimeMs
             loadedFrom = kineResponse.loadedFrom

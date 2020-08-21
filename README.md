@@ -56,21 +56,151 @@ dependencies {
 Kine requests can be made with KineRequest class or using one of the `String` extension methods.
 If you specify a callback the call is `asynchronous`, if you don't it's `synchronous`.
 
-#### Asynchronous Example
+
+#### Get Json
 
 ```kotlin
-
-     "https://jsonplaceholder.typicode.com/posts".httpGet().responseAs(JSONArray::class.java,{ response->
-               val list =  Gson().fromJsonArray<Post>(response.response.toString())
+"https://example/api/test".httpGet().responseAs(JSONObject::class.java,{ response->
+               val response =  response.body
            }, { e ->
                e.printStackTrace()
            })
-
-     
+// for sync
+val response =  "https://example/api/test".httpGet().responseAs(JSONObject::class.java)
 ```
-#### Synchronous Example
+
+#### Get String
+
 ```kotlin
+"https://example/api/test".httpGet().responseAs(String::class.java,{ response->
+               val response =  response.body
+           }, { e ->
+               e.printStackTrace()
+           })
+// for sync
+val response =  "https://example/api/test".httpGet().responseAs(String::class.java)
+```
+#### Get JsonArray
 
+```kotlin
+"https://example/api/test".httpGet().responseAs(JSONArray::class.java,{ response->
+               val list =  Gson().fromJsonArray<Post>(response.body.toString())
+           }, { e ->
+               e.printStackTrace()
+           })
+// for sync
 val response =  "https://jsonplaceholder.typicode.com/posts".httpGet().responseAs(JSONArray::class.java)
+```
 
+#### Get Parsed Response With Gson(requires kine-gson dependency)/Moshi(requires kine-moshi dependency)
+
+```kotlin
+"https://example/api/test".httpGet().responseAs(User::class.java,{ response->
+               val list =  Gson().fromJsonArray<Post>(response.body.toString())
+           }, { e ->
+               e.printStackTrace()
+           })
+// for sync
+val response =  "https://example/api/test".httpGet().responseAs(User::class.java)
+```
+
+#### Use with RxJava2(requires kine-rxjava2 dependency)
+
+##Single
+
+```kotlin
+"https://example/api/test".httpGet().toSingle(clazz)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : SingleObserver<KineResponse<T>?> {
+                override fun onSubscribe(d: Disposable) {
+                }
+                override fun onSuccess(response: KineResponse<T>) {
+                    val response = response.body.toString()
+                }
+                override fun onError(e: Throwable) {
+                    e.printStackTrace()
+                }
+            })
+```
+
+##Flowable
+
+```kotlin
+"https://example/api/test".httpGet().toFlowable(clazz)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : FlowableSubscriber<KineResponse<T>> {
+
+                override fun onError(e: Throwable) {
+                    e.printStackTrace()
+                }
+                override fun onSubscribe(s: Subscription) {
+                    s.request(1)
+                }
+                override fun onNext(response: KineResponse<T>) {
+                    val response = response.body.toString()
+                }
+                override fun onComplete() {
+                }
+            })
+```
+
+##Observable
+
+```kotlin
+ "https://example/api/test".httpGet().toObservable(clazz)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : Observer<KineResponse<T>?> {
+                override fun onError(e: Throwable) {
+                    e.printStackTrace()
+                }
+                override fun onNext(response: KineResponse<T>) {
+                    val response = response.body.toString()
+                }
+                override fun onComplete() {
+                }
+                override fun onSubscribe(d: Disposable) {
+                }
+            })
+```
+
+#### Use with Coroutine(requires kine-coroutine dependency)
+
+```kotlin
+ GlobalScope.launch(Dispatchers.Main) {
+            val response = "https://example/api/test".httpGet().responseAsCoroutine(clazz)
+        }
+```
+
+#### Download File
+
+```kotlin
+"https://example/api/test/files/test10Mb.db".downloadTo(
+            File(Environment.getExternalStorageDirectory(),"test.db"),{downloaded,total->
+// note the progress listener is not called on main thread it is always called on background thread for async request and calling thread on sync 
+// request
+                activity?.runOnUiThread {
+                    val progress = "progress ${((downloaded*100)/total)}"
+                }
+            }, { response ->
+                val savedPath = response.body?.path
+            }, { e ->
+                e.printStackTrace()
+            })
+```
+
+#### Image Loading(requires kine-imageloader dependency)
+
+## Load Bitmap From Url
+```kotlin
+  "https://example/api/test/files/abc.png".loadBitmapResponseFromUrl( { response ->
+            imageView!!.setImageBitmap(response.body)
+        }, { e -> e.printStackTrace() })
+```
+
+## Load Image from Url to ImageView
+```kotlin
+  imageView.loadImage("https://example/api/test/files/abc.png",placeHolderResId)
 ```
