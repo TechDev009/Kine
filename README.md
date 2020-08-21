@@ -58,7 +58,7 @@ Kine requests can be made with KineRequest class or using one of the `String` ex
 If you specify a callback the call is `asynchronous`, if you don't it's `synchronous`.
 
 
-#### Get Json
+### Get Json
 
 ```kotlin
 "https://example/api/test".httpGet().responseAs(JSONObject::class.java,{ response->
@@ -70,7 +70,7 @@ If you specify a callback the call is `asynchronous`, if you don't it's `synchro
 val response =  "https://example/api/test".httpGet().responseAs(JSONObject::class.java)
 ```
 
-#### Get String
+### Get String
 
 ```kotlin
 "https://example/api/test".httpGet().responseAs(String::class.java,{ response->
@@ -81,7 +81,7 @@ val response =  "https://example/api/test".httpGet().responseAs(JSONObject::clas
 // for sync
 val response =  "https://example/api/test".httpGet().responseAs(String::class.java)
 ```
-#### Get JsonArray
+### Get JsonArray
 
 ```kotlin
 "https://example/api/test".httpGet().responseAs(JSONArray::class.java,{ response->
@@ -93,7 +93,7 @@ val response =  "https://example/api/test".httpGet().responseAs(String::class.ja
 val response =  "https://jsonplaceholder.typicode.com/posts".httpGet().responseAs(JSONArray::class.java)
 ```
 
-#### Get Parsed Response With Gson(requires kine-gson dependency)/Moshi(requires kine-moshi dependency)
+### Get Parsed Response With Gson(requires kine-gson dependency)/Moshi(requires kine-moshi dependency)
 
 ```kotlin
 "https://example/api/test".httpGet().responseAs(User::class.java,{ response->
@@ -105,7 +105,7 @@ val response =  "https://jsonplaceholder.typicode.com/posts".httpGet().responseA
 val response =  "https://example/api/test".httpGet().responseAs(User::class.java)
 ```
 
-#### Use with RxJava2(requires kine-rxjava2 dependency)
+### Use with RxJava2(requires kine-rxjava2 dependency)
 
 #### Single
 
@@ -167,7 +167,7 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
             })
 ```
 
-#### Use with Coroutine(requires kine-coroutine dependency)
+### Use with Coroutine(requires kine-coroutine dependency)
 
 ```kotlin
  GlobalScope.launch(Dispatchers.Main) {
@@ -175,7 +175,7 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
         }
 ```
 
-#### Download File
+### Download File
 
 ```kotlin
 "https://example/api/test/files/test10Mb.db".downloadTo(
@@ -192,7 +192,7 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
             })
 ```
 
-#### Image Loading(requires kine-imageloader dependency)
+### Image Loading(requires kine-imageloader dependency)
 
 #### Load Bitmap From Url
 ```kotlin
@@ -206,7 +206,7 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
   imageView.loadImage("https://example/api/test/files/abc.png",placeHolderResId)
 ```
 
-#### Cancelling request
+### Cancelling request
 
 #### Appwide Cancel
 ```kotlin
