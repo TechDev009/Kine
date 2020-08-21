@@ -13,13 +13,14 @@ A simple and powerful HTTP networking library for Kotlin/Android.
 - [x] Response caching in disk 
 - [x] OkHttp cache control full support
 - [x] Supports OkHttp with ability to write your own Httpclient
-- [x] Cancel in-flight request
-- [x] Request timeout
-- [x] Configuration using `Kime`
-- [x] Log manager with option to turn logging off
+- [x] Cancel any in-flight request
+- [x] Request timeout with retry policy
+- [x] AppWide Configuration using `Kime` for common Headers , base Url
+- [x] Log manager with option to turn logging off for per request and App wide
 - [x] Supports response deserialization into POJO/POKO with Gson or Moshi
 - [x] Supports reactive programming via RxJava 2.x
 - [x] Supports kotlin coroutines
+- [x] Supports ability to handle any type of response with custom converter option
 
 ## Upcoming Planned Features
 
