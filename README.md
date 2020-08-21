@@ -221,7 +221,26 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
   "url".httpGet().client(client).responseAs(User::class.java)
   client.cancelAllRequests() // behaves same as above Kine cancel methods
 ```
+## Requirements
 
+### For Android
+
+- Min SDK 21+(for OkHttpClient you can write your own client for supporting Api Version below it)
+- Java 8+
+
+### For Kotlin/Java
+
+- Kotlin 1.4/Java 8+
+
+## R8 / Proguard
+
+If you use R8/Proguard , you may need to add rules for 
+[Coroutines](https://github.com/Kotlin/kotlinx.coroutines/blob/master/kotlinx-coroutines-core/jvm/resources/META-INF/proguard/coroutines.pro), 
+[RxJava2](https://github.com/ReactiveX/RxJava/blob/2.x/src/main/resources/META-INF/proguard/rxjava2.pro)
+[RxJava3](https://github.com/ReactiveX/RxJava/blob/3.x/src/main/resources/META-INF/proguard/rxjava3.pro)
+[OkHttp](https://github.com/square/okhttp/blob/master/okhttp/src/main/resources/META-INF/proguard/okhttp3.pro) and
+ [Okio](https://github.com/square/okio/blob/master/okio/src/jvmMain/resources/META-INF/proguard/okio.pro).
+ 
 ## License
 
     Copyright 2020 Kine

@@ -1,3 +1,4 @@
+include ':kine-rxjava3'
 include ':kine-coroutine'
 include ':kine-rxjava2'
 include ':kine-moshi'
