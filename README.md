@@ -180,8 +180,8 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
 ```kotlin
 "https://example/api/test/files/test10Mb.db".downloadTo(
             File(Environment.getExternalStorageDirectory(),"test.db"),{downloaded,total->
-// note the progress listener is not called on main thread it is always called on background thread for async request and calling thread on sync 
-// request
+// note the progress listener is not called on main thread it is always called on background thread 
+// for async request and calling thread on sync request
                 activity?.runOnUiThread {
                     val progress = "progress ${((downloaded*100)/total)}"
                 }
@@ -211,7 +211,8 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
 #### Appwide Cancel
 ```kotlin
  Kine.cancelAllRequests() // cancels all request with clients set with Kine
- Kine.cancelAllRequests(tag) // cancels all request with that tag with clients set with Kine(note passing null will cancel all request)
+ Kine.cancelAllRequests(tag) // cancels all request with that tag with clients 
+ // set with Kine(note passing null will cancel all request)
 ```
 
 #### Individual Request Client Cancel
