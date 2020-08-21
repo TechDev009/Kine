@@ -54,6 +54,24 @@ dependencies {
 
 ## Usage
 
+### Kine Configuration
+
+```kotlin
+Kine.Builder()
+            .headers(hashMapOf()) // common headers for all app requests
+            .client(OkHttpKineClient()) // common client to use for all requests
+            .converter(GsonConverter()) // gson converter for parsing response
+            .connectionChecker(SimpleConnectionChecker(context!!)) // a simple connection checker for no internet
+            .baseUrl(ConfigUtils.dummyBaseUrl) // a base url for all requests
+            .logLevel(LogLevel.ERROR) // logs to display according to level
+            .disableAllLogs(true) // disable all logging for all requests
+            .build()
+```
+
+Note: Options provided with individual `KineRequest` will always take priority over kine global configuration except for headers , headers will always be added to individual 
+request headers specified by the user
+
+
 Kine requests can be made with `KineRequest` class or using one of the `String` extension methods.
 If you specify a callback the call is asynchronous, if you don't its synchronous.
 
