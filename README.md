@@ -1,4 +1,4 @@
-# Kine
+# Kine (Kotlin I/O Networking Extensions)
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.4.0-blue.svg)](https://kotlinlang.org) 
 

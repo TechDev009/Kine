@@ -13,8 +13,6 @@ abstract class KineClient constructor(){
     @Throws(Throwable::class)
     abstract fun <T> execute(request: Request, clazz: Class<T>): KineResponse<T>
 
-    abstract fun cancelAllRequests(tag: String?)
-
-    abstract fun cancelAllRequests()
+    abstract fun cancelAllRequests(tag: String?=null)
 
 }

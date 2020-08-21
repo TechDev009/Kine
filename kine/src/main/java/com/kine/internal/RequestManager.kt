@@ -114,12 +114,11 @@ internal object RequestManager : IRequestManager {
 
 
     @Suppress("unused")
-    private fun clearRequest(reqTAG: String?) {
+    fun cancelAllRequests(reqTAG: String?=null) {
         kineClients?.forEach {
             it.cancelAllRequests(reqTAG)
         }
     }
-
 
     @Suppress("NAME_SHADOWING")
     private fun <F> enqueueRequest(

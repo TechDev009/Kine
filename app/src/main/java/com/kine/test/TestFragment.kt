@@ -15,7 +15,6 @@ import com.kine.converters.GsonConverter
 import com.kine.converters.MoshiConverter
 import com.kine.extensions.downloadTo
 import com.kine.imageloader.extensions.loadBitmapResponseFromUrl
-import com.kine.imageloader.extensions.loadImage
 import com.kine.log.LogLevel
 import com.kine.test.model.CreateUserResponse
 import com.kine.test.model.UserListResponse

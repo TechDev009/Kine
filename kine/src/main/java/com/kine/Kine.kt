@@ -143,6 +143,9 @@ class Kine private constructor(builder: Builder) {
         fun newBuilder(): Builder {
             return Builder()
         }
+         fun cancelAllRequests(tag: String?=null) {
+            RequestManager.cancelAllRequests(tag)
+        }
     }
 
     init {

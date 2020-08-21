@@ -185,6 +185,7 @@ open class OkHttpKineClient : KineClient {
                 throw com.kine.exceptions.ParseException("unexpected response format")
             }
         }
+        @Suppress("UNCHECKED_CAST")
         return KineResponse(
             responseValue, headers, response.code,
             response.receivedResponseAtMillis - response.sentRequestAtMillis,
@@ -194,16 +195,15 @@ open class OkHttpKineClient : KineClient {
 
 
     override fun cancelAllRequests(tag: String?) {
-        val calls = client?.dispatcher?.queuedCalls() ?: return
+        if(tag==null){
+            return client?.dispatcher?.cancelAll()?:Unit
+        }
+        val calls = client?.dispatcher?.runningCalls() ?: return
         for (call in calls) {
             if (call.request().tag() == tag && !call.isCanceled()) {
                 call.cancel()
             }
         }
-    }
-
-    override fun cancelAllRequests() {
-        client?.dispatcher?.cancelAll()
     }
 
     private fun getRequestBody(requestBody: RequestBody): okhttp3.RequestBody {

@@ -1,8 +1,11 @@
 package com.kine.client.extensions
 
 
+import com.kine.KineRequest
+import com.kine.client.OkHttpKineClient
 import com.kine.extensions.ProgressListener
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okio.*
 import java.io.File
@@ -96,6 +99,12 @@ internal inline fun FileOutputStream.download(
         close()
         progressListener(contentLength, contentLength)
     }
+}
+fun KineRequest.IBuildOptions.client(okHttpClient: OkHttpClient): KineRequest.IBuildOptions {
+    return client(okHttpClient.toKineClient())
+}
+fun OkHttpClient.toKineClient(): OkHttpKineClient {
+    return OkHttpKineClient(this)
 }
 
 
