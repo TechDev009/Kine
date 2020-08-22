@@ -54,6 +54,24 @@ dependencies {
 
 ## Usage
 
+### Kine Configuration
+
+```kotlin
+Kine.Builder()
+            .headers(hashMapOf()) // common headers for all app requests
+            .client(OkHttpKineClient()) // common client to use for all requests
+            .converter(GsonConverter()) // gson converter for parsing response
+            .connectionChecker(SimpleConnectionChecker(context!!)) // a simple connection checker for no internet
+            .baseUrl(ConfigUtils.dummyBaseUrl) // a base url for all requests
+            .logLevel(LogLevel.ERROR) // logs to display according to level
+            .disableAllLogs(true) // disable all logging for all requests
+            .build()
+```
+
+Note: Options provided with individual `KineRequest` will always take priority over kine global configuration except for headers , headers will always be added to individual 
+request headers specified by the user
+
+
 Kine requests can be made with `KineRequest` class or using one of the `String` extension methods.
 If you specify a callback the call is asynchronous, if you don't its synchronous.
 
@@ -93,7 +111,7 @@ val response =  "https://example/api/test".httpGet().responseAs(String::class.ja
 val response =  "https://jsonplaceholder.typicode.com/posts".httpGet().responseAs(JSONArray::class.java)
 ```
 
-### Get Parsed Response With Gson(requires kine-gson dependency)/Moshi(requires kine-moshi dependency)
+### Gson (requires kine-gson dependency) / Moshi (requires kine-moshi dependency)
 
 ```kotlin
 "https://example/api/test".httpGet().responseAs(User::class.java,{ response->
@@ -105,7 +123,7 @@ val response =  "https://jsonplaceholder.typicode.com/posts".httpGet().responseA
 val response =  "https://example/api/test".httpGet().responseAs(User::class.java)
 ```
 
-### Use with RxJava2(requires kine-rxjava2 dependency)
+### RxJava2 (requires kine-rxjava2 dependency) / RxJava3 (requires kine-rxjava3 dependency)
 
 #### Single
 
@@ -167,7 +185,7 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
             })
 ```
 
-### Use with Coroutine(requires kine-coroutine dependency)
+### Kotlin Coroutine (requires kine-coroutine dependency)
 
 ```kotlin
  GlobalScope.launch(Dispatchers.Main) {
@@ -192,7 +210,7 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
             })
 ```
 
-### Image Loading(requires kine-imageloader dependency)
+### Image Loading (requires kine-imageloader dependency)
 
 #### Load Bitmap From Url
 ```kotlin
