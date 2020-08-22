@@ -11,14 +11,12 @@ import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import com.kine.Kine
-import com.kine.KineRequest
 import com.kine.converters.GsonConverter
 import com.kine.converters.MoshiConverter
 import com.kine.extensions.downloadTo
 import com.kine.imageloader.extensions.loadBitmapResponseFromUrl
 import com.kine.log.LogLevel
 import com.kine.test.model.CreateUserResponse
-import com.kine.test.model.User
 import com.kine.test.model.UserListResponse
 import kotlinx.android.synthetic.main.fragment_main.*
 import org.json.JSONObject
