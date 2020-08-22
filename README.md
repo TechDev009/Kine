@@ -245,12 +245,12 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
 ### MultiPart Image Upload
 
 ```kotlin
-        KineRequest.upload("").addMultiPartParam("name","test",null).addMultiPartFileParam("tset",
-        File("sdcard/test.apk"),null).setUploadListener { bytesWritten, total ->  }.responseAs(User::class.java,{ response->
-            val response = response.body
-        },{e->
-            e.printStackTrace()
-        })
+   KineRequest.upload("").addMultiPartParam("name","test",null).addMultiPartFileParam("tset",
+   File("sdcard/test.apk"),null).setUploadListener { bytesWritten, total ->  }.responseAs(User::class.java,{ response->
+   val response = response.body
+     },{e->
+           e.printStackTrace()
+     })
 ```
 
 
