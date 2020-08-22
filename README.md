@@ -10,6 +10,7 @@ A simple and powerful HTTP networking library for Kotlin/Android.
 - [x] Supports synchronous and asynchronous requests
 - [x] Download file with progress
 - [x] Get Image as bitmap from url
+- [x] MultiPart Upload
 - [x] Response caching in disk 
 - [x] OkHttp cache control full support
 - [x] Supports OkHttp with ability to write your own Httpclient
@@ -18,13 +19,12 @@ A simple and powerful HTTP networking library for Kotlin/Android.
 - [x] App Wide Configuration using `Kime` with support for common Headers , base Url and for all request
 - [x] Log manager with option to turn logging off for per request and App wide
 - [x] Supports response deserialization into POJO/POKO with Gson or Moshi
-- [x] Supports reactive programming via RxJava 2.x
+- [x] Supports reactive programming via RxJava 2.x / RxJava 3.x
 - [x] Supports kotlin coroutines
 - [x] Supports ability to handle any type of response with custom converter option
 
 ## Upcoming Planned Features
 
-- Upload file (multipart/form-data)
 - Support for jackson parser
 - Bitmap caching and auto previous request cancellation for ImageLoading
 - New interceptor api for manipulating request pre execute
@@ -44,10 +44,12 @@ dependencies {
     compile 'com.kine:kine:1.0.0.0' //for JVM
     compile 'com.kine:kine-android:1.0.0.0' //for Android
     compile 'com.kine:kine-rxjava2:2.2.19.0' //for RxJava2 support
+    compile 'com.kine:kine-rxjava3:3.0.6.0' //for RxJava3 support
     compile 'com.kine:kine-coroutine:1.3.8.0' //for Coroutine support
     compile 'com.kine:kine-gson:2.8.6.0' //for Gson support
     compile 'com.kine:kine-moshi:1.9.3.0' //for Moshi support
     compile 'com.kine:kine-okhttp:4.8.1.0' //for OkHttp support
+    compile 'com.kine:kine-okhttplegacy:3.12.12.0' //for OkHttp support
     compile 'com.kine:kine-imageloader:1.0.0.0' //for Imageloading support
 }
 ```
