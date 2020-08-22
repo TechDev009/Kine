@@ -18,6 +18,7 @@ import com.kine.extensions.downloadTo
 import com.kine.imageloader.extensions.loadBitmapResponseFromUrl
 import com.kine.log.LogLevel
 import com.kine.test.model.CreateUserResponse
+import com.kine.test.model.User
 import com.kine.test.model.UserListResponse
 import kotlinx.android.synthetic.main.fragment_main.*
 import org.json.JSONObject
@@ -39,6 +40,7 @@ class TestFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         Kine.Builder()
             .baseUrl(ConfigUtils.dummyBaseUrl)
             .logLevel(LogLevel.ERROR)

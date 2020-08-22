@@ -49,7 +49,7 @@ dependencies {
     compile 'com.kine:kine-gson:2.8.6.0' //for Gson support
     compile 'com.kine:kine-moshi:1.9.3.0' //for Moshi support
     compile 'com.kine:kine-okhttp:4.8.1.0' //for OkHttp support
-    compile 'com.kine:kine-okhttplegacy:3.12.12.0' //for OkHttp support
+    compile 'com.kine:kine-okhttplegacy:3.12.12.0' //for Legacy OkHttp support(API 9)
     compile 'com.kine:kine-imageloader:1.0.0.0' //for Imageloading support
 }
 ```
@@ -241,12 +241,30 @@ val response =  "https://example/api/test".httpGet().responseAs(User::class.java
   "url".httpGet().client(client).responseAs(User::class.java)
   client.cancelAllRequests() // behaves same as above Kine cancel methods
 ```
+
+### MultiPart Image Upload
+
+```kotlin
+        KineRequest.upload("").addMultiPartParam("name","test",null).addMultiPartFileParam("tset",
+        File("sdcard/test.apk"),null).setUploadListener { bytesWritten, total ->  }.responseAs(User::class.java,{ response->
+            val response = response.body
+        },{e->
+            e.printStackTrace()
+        })
+```
+
+
 ## Requirements
 
 ### For Android
 
+OkHttp 4x
 - Min SDK 21+(for OkHttpClient you can write your own client for supporting Api Version below it)
 - Java 8+
+
+OkHttp 3x (legacy)
+- Min SDK 9+(for OkHttpClient you can write your own client for supporting Api Version below it)
+- Java 7+
 
 ### For Kotlin/Java
 
