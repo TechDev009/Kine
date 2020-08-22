@@ -14,15 +14,8 @@ import com.kine.request.Request
 import com.kine.request.RequestBody
 import com.kine.response.KineResponse
 import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSource
-import okio.ByteString
 import java.io.File
-import java.io.IOException
 import java.io.InputStream
 import java.io.Reader
 import java.util.concurrent.TimeUnit
@@ -57,29 +50,26 @@ open class OkHttpKineClient : KineClient {
                 retryPolicy.getCurrentTimeout().toLong(),
                 TimeUnit.MILLISECONDS
             )
-            .addInterceptor(object : Interceptor {
-                @Throws(IOException::class)
-                override fun intercept(chain: Interceptor.Chain): Response {
-                    val request = chain.request()
-                    // try the request
-                    var response = chain.proceed(request)
-                    var tryCount = 0
+            .addInterceptor { chain ->
+                val request = chain.request()
+                // try the request
+                var response = chain.proceed(request)
+                var tryCount = 0
 
-                    while (!response.isSuccessful && tryCount < retryPolicy.getRetryCount()) {
-                        w("intercept", "Request is not successful - $tryCount")
-                        tryCount++
-                        // Request customization: add request headers
-                        val requestBuilder = request.newBuilder()
-                            .headers(request.headers)
-                            .method(request.method, request.body)
-                        val newRequest = requestBuilder.build()
-                        // retry the request
-                        response = chain.proceed(newRequest)
-                    }
-                    // otherwise just pass the original response on
-                    return response
+                while (!response.isSuccessful && tryCount < retryPolicy.getRetryCount()) {
+                    w("intercept", "Request is not successful - $tryCount")
+                    tryCount++
+                    // Request customization: add request headers
+                    val requestBuilder = request.newBuilder()
+                        .headers(request.headers())
+                        .method(request.method(), request.body())
+                    val newRequest = requestBuilder.build()
+                    // retry the request
+                    response = chain.proceed(newRequest)
                 }
-            }).build()
+                // otherwise just pass the original response on
+                response
+            }.build()
     }
 
     override fun canHandleRequest(url: String, method: Int): Boolean {
@@ -134,7 +124,7 @@ open class OkHttpKineClient : KineClient {
             else -> null
         }
         cacheControl?.apply {
-            builder.cacheControl(cacheControl = this)
+            builder.cacheControl(this)
         }
         request.retryPolicy?.let {
             if (!it.isSame(retryPolicy)) {
@@ -143,19 +133,19 @@ open class OkHttpKineClient : KineClient {
         }
         val response = client!!.newCall(builder.build()).execute()
         if (!response.isSuccessful) {
-            Logger.e(TAG, request.data.reqTAG + " onErrorResponse >> errorCode: " + response.code)
-            throw HttpStatusCodeException(code = response.code)
+            Logger.e(TAG, request.data.reqTAG + " onErrorResponse >> errorCode: " + response.code())
+            throw HttpStatusCodeException(code = response.code())
         }
-        val body: ResponseBody? = response.body
+        val body: ResponseBody? = response.body()
         if (body == null) {
             Logger.e(TAG, "onResponse jsonObject: null")
             throw NullResponseBodyException()
         }
-        val responseHeaders = response.headers
+        val responseHeaders = response.headers()
         val headers: HashMap<String, String>
-        headers = HashMap(responseHeaders.size)
+        headers = HashMap(responseHeaders.size())
         var i = 0
-        val size = responseHeaders.size
+        val size = responseHeaders.size()
         while (i < size) {
             headers[responseHeaders.name(i)] = responseHeaders.value(i)
             i++
@@ -172,9 +162,6 @@ open class OkHttpKineClient : KineClient {
             clazz.isAssignableFrom(ByteArray::class.java) -> {
                 body.bytes()
             }
-            clazz.isAssignableFrom(ByteString::class.java) -> {
-                body.byteString()
-            }
             clazz.isAssignableFrom(InputStream::class.java) -> {
                 body.byteStream()
             }
@@ -190,8 +177,8 @@ open class OkHttpKineClient : KineClient {
         }
         @Suppress("UNCHECKED_CAST")
         return KineResponse(
-            responseValue, headers, response.code,
-            response.receivedResponseAtMillis - response.sentRequestAtMillis,
+            responseValue, headers, response.code(),
+            response.receivedResponseAtMillis() - response.sentRequestAtMillis(),
             KineResponse.LoadedFrom.NETWORK
         ) as KineResponse<T>
     }
@@ -199,11 +186,11 @@ open class OkHttpKineClient : KineClient {
 
     override fun cancelAllRequests(tag: String?) {
         if(tag==null){
-            return client?.dispatcher?.cancelAll()?:Unit
+            return client?.dispatcher()?.cancelAll()?:Unit
         }
-        val calls = client?.dispatcher?.runningCalls() ?: return
+        val calls = client?.dispatcher()?.runningCalls() ?: return
         for (call in calls) {
-            if (call.request().tag() == tag && !call.isCanceled()) {
+            if (call.request().tag() == tag && !call.isCanceled) {
                 call.cancel()
             }
         }
@@ -212,7 +199,7 @@ open class OkHttpKineClient : KineClient {
     private fun getRequestBody(requestBody: RequestBody): okhttp3.RequestBody {
         return when (requestBody) {
             is StringRequestBody -> {
-                (requestBody.body ?: "").toRequestBody(requestBody.mediaType.toMediaType())
+                okhttp3.RequestBody.create(MediaType.get(requestBody.mediaType),requestBody.body ?: "")
             }
             is EncodedRequestBody -> {
                 val builder = FormBody.Builder()
@@ -230,35 +217,35 @@ open class OkHttpKineClient : KineClient {
             }
             is MultiPartRequestBody -> {
                 val builder = MultipartBody.Builder()
-                    .setType(if (requestBody.mediaType == null) MULTIPART_FORM else requestBody.mediaType.toMediaType())
+                    .setType(if (requestBody.mediaType == null) MULTIPART_FORM else MediaType.get(requestBody.mediaType))
                 //passing both meta data and file content for uploading
                 requestBody.multiPartParameterMap.apply {
                     for ((key, stringBody) in this.entries) {
-                        val mediaType: MediaType? = stringBody.contentType?.toMediaTypeOrNull()
-                        builder.addFormDataPart(key,null,stringBody.value.toRequestBody(mediaType))
+                        @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+                        val mediaType: MediaType? = MediaType.parse(stringBody.contentType)
+                        builder.addFormDataPart(key,null,okhttp3.RequestBody.create(mediaType,stringBody.value))
                     }
                 }
                 for ((key, fileBodies) in requestBody.multiPartFileMap.entries) {
                     for (fileBody in fileBodies) {
                         val fileName: String = fileBody.value.name
-                        val mediaType: MediaType? = fileBody.contentType?.toMediaTypeOrNull()
-                            ?:fileName.getMimeType().toMediaTypeOrNull()
-                        builder.addFormDataPart(key,fileName,fileBody.value.asRequestBody(mediaType))
+                        val mediaType: MediaType? = MediaType.get(fileBody.contentType?:fileName.getMimeType())
+                        builder.addFormDataPart(key,fileName,okhttp3.RequestBody.create(mediaType,fileBody.value))
                     }
                 }
                 builder.build()
             }
             else -> {
-                "".toRequestBody(requestBody.mediaType.toMediaType())
+                okhttp3.RequestBody.create(MediaType.get(requestBody.mediaType),"")
             }
         }
     }
 
     @Suppress("unused")
     companion object {
-        val JSON: MediaType = ContentType.JSON.toString().toMediaType()
-        val STRING: MediaType = ContentType.STRING.toString().toMediaType()
-        val MULTIPART_FORM: MediaType = ContentType.MULTIPART_FORM.toString().toMediaType()
+        val JSON: MediaType = MediaType.get(ContentType.JSON.toString())
+        val STRING: MediaType = MediaType.get(ContentType.STRING.toString())
+        val MULTIPART_FORM: MediaType = MediaType.get(ContentType.MULTIPART_FORM.toString())
         val TAG = OkHttpKineClient::class.java.simpleName
     }
 }

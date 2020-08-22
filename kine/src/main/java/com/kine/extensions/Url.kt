@@ -1,7 +1,7 @@
 package com.kine.extensions
 
 import com.kine.KineRequest
-import com.kine.converters.FileDownloadConverter
+import com.kine.request.ContentType
 import com.kine.response.KineResponse
 import com.kine.response.OnError
 import com.kine.response.OnSuccess
@@ -12,26 +12,26 @@ import java.io.File
  */
 typealias ProgressListener = (Long,Long)->Unit
 
-fun String.httpGet(): KineRequest.IBuildOptions {
-    return KineRequest.get().url(this)
+fun String.httpGet(): KineRequest.RequestOptionsBuilder {
+    return KineRequest.get(this)
 }
-fun String.httpHead(): KineRequest.IBuildOptions {
-    return KineRequest.head().url(this)
+fun String.httpHead(): KineRequest.RequestOptionsBuilder {
+    return KineRequest.head(this)
 }
-fun String.httpPost(params : String?=null): KineRequest.IBuildOptions {
-    return KineRequest.post(params).url(this)
+fun String.httpPost(params : String?=null,contentType: String=ContentType.JSON.toString()): KineRequest.RequestBodyBuilder {
+    return KineRequest.post(this).bodyParams(params,contentType)
 }
-fun String.httpDelete(params : String?=null): KineRequest.IBuildOptions {
-    return KineRequest.delete(params).url(this)
+fun String.httpDelete(params : String?=null,contentType: String=ContentType.JSON.toString()): KineRequest.RequestBodyBuilder {
+    return KineRequest.delete(this).bodyParams(params,contentType)
 }
-fun String.httpPut(params : String?=null): KineRequest.IBuildOptions {
-    return KineRequest.put(params).url(this)
+fun String.httpPut(params : String?=null,contentType: String= ContentType.JSON.toString()): KineRequest.RequestBodyBuilder {
+    return KineRequest.put(this).bodyParams(params,contentType)
 }
-fun String.httpPatch(params : String?=null): KineRequest.IBuildOptions {
-    return KineRequest.patch(params).url(this)
+fun String.httpPatch(params : String?=null,contentType: String=ContentType.JSON.toString()): KineRequest.RequestBodyBuilder {
+    return KineRequest.patch(this).bodyParams(params,contentType)
 }
-fun String.httpMethod(method : Int,params : String?=null): KineRequest.IBuildOptions {
-    return KineRequest.method(method).url(this).bodyParams(params)
+fun String.httpMethod(method : Int): KineRequest.RequestOptionsBuilder {
+    return KineRequest.method(this,method)
 }
 fun <F> String.httpGetAs(clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError) {
     return this.httpGet().responseAs(clazz,onSuccess, onError)
@@ -45,7 +45,7 @@ fun <F> String.httpPostAs(params : String?,clazz: Class<F>): KineResponse<F>? {
 fun <F> String.httpPostAs(params : String?,clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError){
     return this.httpPost(params).responseAs(clazz,onSuccess, onError)
 }
-fun <F> KineRequest.IBuildOptions.httpGetAsString(onSuccess: OnSuccess<String>, onError: OnError){
+fun <F> KineRequest.RequestOptionsBuilder.httpGetAsString(onSuccess: OnSuccess<String>, onError: OnError){
     return responseAs(String::class.java,onSuccess, onError)
 }
 

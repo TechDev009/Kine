@@ -38,46 +38,34 @@ fun String.buildUrl(pathParams:List<String>?=null,queryParams:HashMap<String,Str
 fun Map<*,*>.toJsonObject(): JSONObject {
     return JSONObject(this)
 }
-fun KineRequest.httpPost(jsonObject : JSONObject?): KineRequest.IBuildUrl {
-    return KineRequest.post(jsonObject?.toString())
-}
-fun KineRequest.httpDelete(jsonObject : JSONObject?): KineRequest.IBuildUrl {
-    return KineRequest.delete(jsonObject?.toString())
-}
-fun KineRequest.httpPut(jsonObject : JSONObject?): KineRequest.IBuildUrl {
-    return KineRequest.put(jsonObject?.toString())
-}
-fun KineRequest.httpPatch(jsonObject : JSONObject?): KineRequest.IBuildUrl {
-    return KineRequest.patch(jsonObject?.toString())
-}
-fun KineRequest.IBuildOptions.bodyParams(jsonObject : JSONObject?): KineRequest.IBuildOptions {
+
+fun KineRequest.RequestBodyBuilder.bodyParams(jsonObject : JSONObject?): KineRequest.RequestBodyBuilder {
     return bodyParams(jsonObject?.toString())
 }
-fun KineRequest.IBuildOptions.bodyParams(jsonObject : JSONArray?): KineRequest.IBuildOptions {
+fun KineRequest.RequestBodyBuilder.bodyParams(jsonObject : JSONArray?): KineRequest.RequestBodyBuilder {
     return bodyParams(jsonObject?.toString())
 }
-fun KineRequest.IBuildOptions.bodyParams(jsonObject : JsonRequestBody): KineRequest.IBuildOptions {
+fun KineRequest.RequestBodyBuilder.bodyParams(jsonObject : JsonRequestBody): KineRequest.RequestBodyBuilder {
     return bodyParams(jsonObject.body,jsonObject.mediaType)
 }
-fun String.httpPost(jsonObject : JSONObject?): KineRequest.IBuildOptions {
-    return KineRequest.post(jsonObject?.toString()).url(this)
+fun String.httpPost(jsonObject : JSONObject?): KineRequest.RequestBodyBuilder {
+    return KineRequest.post(this).bodyParams(jsonObject?.toString())
 }
-fun String.httpDelete(jsonObject : JSONObject?): KineRequest.IBuildOptions {
-    return KineRequest.delete(jsonObject?.toString()).url(this)
+fun String.httpDelete(jsonObject : JSONObject?): KineRequest.RequestBodyBuilder {
+    return KineRequest.delete(this).bodyParams(jsonObject?.toString())
 }
-fun String.httpPut(jsonObject : JSONObject?): KineRequest.IBuildOptions {
-    return KineRequest.put(jsonObject?.toString()).url(this)
+fun String.httpPut(jsonObject : JSONObject?): KineRequest.RequestBodyBuilder {
+    return KineRequest.put(this).bodyParams(jsonObject?.toString())
 }
-fun String.httpPatch(jsonObject : JSONObject?): KineRequest.IBuildOptions {
-    return KineRequest.patch(jsonObject?.toString()).url(this)
+fun String.httpPatch(jsonObject : JSONObject?): KineRequest.RequestBodyBuilder {
+    return KineRequest.patch(this).bodyParams(jsonObject?.toString())
 }
 fun <F> String.httpPostAs(jsonObject : JSONObject?, clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError){
     return this.httpPost(jsonObject).responseAs(clazz,onSuccess, onError)
 }
-
-fun <F> KineRequest.IBuildOptions.responseAsJson(onSuccess: OnSuccess<JSONObject>, onError: OnError){
+fun <F> KineRequest.RequestOptionsBuilder.responseAsJson(onSuccess: OnSuccess<JSONObject>, onError: OnError){
     return this.converter(JsonConverter()).responseAs(JSONObject::class.java,onSuccess, onError)
 }
-fun <F> KineRequest.IBuildOptions.responseAsJsonArray(onSuccess: OnSuccess<JSONArray>, onError: OnError){
+fun <F> KineRequest.RequestOptionsBuilder.responseAsJsonArray(onSuccess: OnSuccess<JSONArray>, onError: OnError){
     return this.converter(JsonConverter()).responseAs(JSONArray::class.java,onSuccess, onError)
 }

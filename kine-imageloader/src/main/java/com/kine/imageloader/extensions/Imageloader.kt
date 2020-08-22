@@ -1,3 +1,5 @@
+@file:JvmName("ImageLoader")
+
 package com.kine.imageloader.extensions
 
 import android.graphics.Bitmap
@@ -12,8 +14,6 @@ import com.kine.response.KineError
 import com.kine.response.KineResponse
 import com.kine.response.OnError
 import com.kine.response.OnSuccess
-import org.json.JSONArray
-import org.json.JSONObject
 
 inline fun ImageView.loadImage(url: String, @DrawableRes placeHolder: Int? = null,crossinline onSuccess: OnSuccess<Bitmap>,
                         crossinline onError: OnError = { _ -> }) {
@@ -67,7 +67,8 @@ inline fun String.loadBitmapResponseFromUrl(crossinline onSuccess: OnSuccess<Bit
             onError(error)
         })
 }
-inline fun KineRequest.IBuildOptions.loadBitmap(crossinline onSuccess: OnSuccess<Bitmap>, crossinline onError: OnError = { _ -> }) {
+
+inline fun KineRequest.RequestOptionsBuilder.loadBitmap(crossinline onSuccess: OnSuccess<Bitmap>, crossinline onError: OnError = { _ -> }) {
     return converter(BitmapConverter()).responseAs(BitmapKineClass(), { response ->
         response.body?:onError(KineError(NullResponseException("null bitmap")))
         response.body?.apply {
@@ -78,9 +79,6 @@ inline fun KineRequest.IBuildOptions.loadBitmap(crossinline onSuccess: OnSuccess
         onError(error)
     })
 }
- fun KineRequest.IBuildOptions.loadBitmap(): KineResponse<Bitmap>? {
+ fun KineRequest.RequestOptionsBuilder.loadBitmap(): KineResponse<Bitmap>? {
     return converter(BitmapConverter()).responseAs(BitmapKineClass())
-}
-fun KineRequest.IBuildOptions.bodyParams(jsonObject : JSONArray?): KineRequest.IBuildOptions {
-    return bodyParams(jsonObject?.toString())
 }

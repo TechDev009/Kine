@@ -4,10 +4,11 @@ package com.kine.client.extensions
 import com.kine.KineRequest
 import com.kine.client.OkHttpKineClient
 import com.kine.extensions.ProgressListener
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okio.*
+import okio.Okio.sink
 import java.io.File
 import java.io.FileDescriptor
 import java.io.FileOutputStream
@@ -18,8 +19,7 @@ fun String.buildUrl(
     encodedPathParams: List<String>? = null,
     encodedQueryParams: HashMap<String, String>? = null
 ): String {
-    val urlBuilder =
-        this.toHttpUrlOrNull()?.newBuilder() ?: throw IllegalArgumentException("not a valid url")
+    val urlBuilder = HttpUrl.parse(this)?.newBuilder() ?: throw IllegalArgumentException("not a valid url")
     pathParams?.apply {
         for (value in this) {
             urlBuilder.addEncodedPathSegment(value)
@@ -52,7 +52,7 @@ internal inline fun File.download(
 ): File {
     val contentLength: Long = body.contentLength()
     val source: BufferedSource = body.source()
-    val sink: BufferedSink = this.sink().buffer()
+    val sink: BufferedSink = Okio.buffer(sink(this))
     sink.use {
         var totalRead: Long = 0
         var read: Long
@@ -84,7 +84,7 @@ internal inline fun FileOutputStream.download(
     use {
         val contentLength: Long = body.contentLength()
         val source: BufferedSource = body.source()
-        val sink: BufferedSink = this.sink().buffer()
+        val sink: BufferedSink = Okio.buffer(sink(this))
         var totalRead: Long = 0
         var read: Long
         val buffer = Buffer()

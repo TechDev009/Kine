@@ -48,7 +48,7 @@ class Kine private constructor(builder: Builder) {
          * Sets the `requestHeader` and returns a reference to `IRetryPolicy`
          *
          * @param params the `requestHeader` to set
-         * @return a reference to this Builder
+         * @return a reference to this RequestBuilder
          */
         fun headers(params : HashMap<String, String?>?): Builder {
             headers = params
@@ -74,7 +74,7 @@ class Kine private constructor(builder: Builder) {
          * Sets the `retryPolicy` and returns a reference to `IReqTAG`
          *
          * @param retryPolicy the `retryPolicy` to set
-         * @return a reference to this Builder
+         * @return a reference to this RequestBuilder
          */
         fun retryPolicy(retryPolicy: RetryPolicy?): Builder {
             this.retryPolicy = retryPolicy
@@ -91,10 +91,10 @@ class Kine private constructor(builder: Builder) {
         }
 
         /**
-         * Sets the `KineClient` and returns a reference to this Builder so that the methods can be chained together.
+         * Sets the `KineClient` and returns a reference to this RequestBuilder so that the methods can be chained together.
          *
          * @param `kineClient` the `KineClient` to set
-         * @return a reference to this Builder
+         * @return a reference to this RequestBuilder
          */
         fun client(kineClient: KineClient): Builder {
             this.kineClients= arrayListOf(kineClient)
@@ -132,7 +132,7 @@ class Kine private constructor(builder: Builder) {
         /**
          * Returns a `GlobalRequestBuilder` built from the parameters previously set.
          *
-         * @return a `GlobalRequestBuilder` built with parameters of this `GlobalRequestBuilder.Builder`
+         * @return a `GlobalRequestBuilder` built with parameters of this `GlobalRequestBuilder.RequestBuilder`
          */
         fun build(): Kine {
             return Kine(this)

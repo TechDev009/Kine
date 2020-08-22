@@ -11,11 +11,9 @@ import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import com.kine.Kine
-import com.kine.client.OkHttpKineClient
 import com.kine.converters.GsonConverter
 import com.kine.converters.MoshiConverter
 import com.kine.extensions.downloadTo
-import com.kine.extensions.httpGet
 import com.kine.imageloader.extensions.loadBitmapResponseFromUrl
 import com.kine.log.LogLevel
 import com.kine.test.model.CreateUserResponse
@@ -53,7 +51,7 @@ class TestFragment : Fragment() {
                 }
                 1 -> {
                     NetworkUtils.postRequest(CreateUserResponse::class.java, parseTime, resp)
-                    { it.converter(GsonConverter()).bodyParams(hashMapOf())}
+                    { it.converter(GsonConverter())}
                 }
                 2 -> {
                     NetworkUtils.getRequest(UserListResponse::class.java, parseTime, resp)

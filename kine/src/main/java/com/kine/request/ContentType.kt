@@ -6,7 +6,7 @@ package com.kine.request
 
 enum class ContentType(private val value:String) {
     JSON("application/json; charset=utf-8"), STRING("text/plain; charset=utf-8"),
-    ENCODED("application/x-www-form-urlencoded");
+    ENCODED("application/x-www-form-urlencoded"),MULTIPART_FORM("multipart/form-data");
 
     override fun toString(): String {
         return value

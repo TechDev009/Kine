@@ -7,7 +7,7 @@ import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 
-fun <F> KineRequest.IBuildOptions.toSingle(callback:Class<F>): Single<KineResponse<F>?> {
+fun <F> KineRequest.RequestOptionsBuilder.toSingle(callback:Class<F>): Single<KineResponse<F>?> {
     return build().toSingle(callback)
 }
 fun <F> KineRequest.toSingle(callback:Class<F>): Single<KineResponse<F>?> {
@@ -15,7 +15,7 @@ fun <F> KineRequest.toSingle(callback:Class<F>): Single<KineResponse<F>?> {
         this.execute(DefaultKineClass(callback))
     }
 }
-fun <F> KineRequest.IBuildOptions.toFlowable(callback:Class<F>): Flowable<KineResponse<F>?> {
+fun <F> KineRequest.RequestOptionsBuilder.toFlowable(callback:Class<F>): Flowable<KineResponse<F>?> {
     return build().toFlowable(callback)
 }
 fun <F> KineRequest.toFlowable(callback:Class<F>): Flowable<KineResponse<F>?> {
@@ -23,7 +23,7 @@ fun <F> KineRequest.toFlowable(callback:Class<F>): Flowable<KineResponse<F>?> {
         this.execute(DefaultKineClass(callback))
     }
 }
-fun <F> KineRequest.IBuildOptions.toObservable(callback:Class<F>): Observable<KineResponse<F>?> {
+fun <F> KineRequest.RequestOptionsBuilder.toObservable(callback:Class<F>): Observable<KineResponse<F>?> {
     return build().toObservable(callback)
 }
 fun <F> KineRequest.toObservable(callback:Class<F>): Observable<KineResponse<F>?> {

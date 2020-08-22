@@ -32,7 +32,7 @@ object NetworkUtils {
     val GET_URL = "users?page=2"
     val POST_URL = "users"
     fun <T> getRequest(clazz: Class<T>, timeTextView: TextView, responseTextView: TextView,
-                       func: ((KineRequest.IBuildOptions) -> KineRequest.IBuildOptions)?=null) {
+                       func: ((KineRequest.RequestOptionsBuilder) -> KineRequest.RequestOptionsBuilder)?=null) {
         val time = System.currentTimeMillis()
         GET_URL.httpGet().apply { func?.invoke(this) }.responseAs(clazz, { response ->
             Log.e("response1", response.networkTimeMs.toString() + " " + response.parseTime)
@@ -172,7 +172,7 @@ object NetworkUtils {
 
     fun <T> postRequest(
         clazz: Class<T>, timeTextView: TextView, responseTextView: TextView,
-        func: (KineRequest.IBuildOptions) -> KineRequest.IBuildOptions
+        func: (KineRequest.RequestBodyBuilder) -> KineRequest.RequestOptionsBuilder
     ) {
         val time = System.currentTimeMillis()
         POST_URL.httpPost(JSONObject().put("name", "yodo").put("job", "test")).apply {

@@ -8,7 +8,7 @@ import com.kine.policies.RetryPolicy
 import java.util.concurrent.Executor
 
 
-/**
+/**`
  * An Request. This class is used to store all information associated with a single HTTP request.
  */
  open class Request(val kineClient: KineClient?, val converter: Converter?,

@@ -6,7 +6,7 @@ import com.kine.response.KineResponse
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
-suspend fun <F> KineRequest.IBuildOptions.responseAsCoroutine(clazz: Class<F>, scope: CoroutineContext = Dispatchers.IO): KineResponse<F>? {
+suspend fun <F> KineRequest.RequestOptionsBuilder.responseAsCoroutine(clazz: Class<F>, scope: CoroutineContext = Dispatchers.IO): KineResponse<F>? {
     return build().responseAsCoroutine(clazz, scope)
 }
 

@@ -34,10 +34,10 @@ import java.util.concurrent.TimeUnit
  *  Class for making a single HTTP request with config.
  */
 
-open class KineRequest private constructor(builder: Builder) {
+open class KineRequest private constructor(requestBuilder: RequestBuilder) {
     private var method = Method.POST
     private val requestUrl: String
-    private val requestBody: RequestBody
+    private val requestBody: RequestBody?
     private val kineClient: KineClient?
     private val converter: Converter?
     private val retryPolicy: RetryPolicy?
@@ -54,23 +54,23 @@ open class KineRequest private constructor(builder: Builder) {
     private var progressListener: ProgressListener? = null
 
     init {
-        method = builder.method
-        requestUrl = builder.requestUrl
-        requestBody = builder.requestBody
-        retryPolicy = builder.retryPolicy
-        reqTAG = builder.reqTAG
-        networkPolicy = builder.networkPolicy
-        priority = builder.priority
-        cacheMaxAge = builder.cacheMaxAge
-        timeUnit= builder.timeUnit
-        headers = builder.headers
-        queryParams = builder.queryParams
-        kineClient = builder.kineClient
-        executor = builder.executor
-        logLevel = builder.logLevel
-        converter = builder.converter
-        file = builder.file
-        progressListener = builder.progressListener
+        method = requestBuilder.method
+        requestUrl = requestBuilder.url
+        requestBody = requestBuilder.requestBody
+        retryPolicy = requestBuilder.retryPolicy
+        reqTAG = requestBuilder.reqTAG
+        networkPolicy = requestBuilder.networkPolicy
+        priority = requestBuilder.priority
+        cacheMaxAge = requestBuilder.cacheMaxAge
+        timeUnit= requestBuilder.timeUnit
+        headers = requestBuilder.headers
+        queryParams = requestBuilder.queryParams
+        kineClient = requestBuilder.kineClient
+        executor = requestBuilder.executor
+        logLevel = requestBuilder.logLevel
+        converter = requestBuilder.converter
+        file = requestBuilder.file
+        progressListener = requestBuilder.progressListener
     }
 
     fun <F> execute(clazz: KineClass<F>): KineResponse<F>? {
@@ -86,7 +86,7 @@ open class KineRequest private constructor(builder: Builder) {
             DownloadRequest(
                 file!!,
                 progressListener!!, kineClient, converter,
-                RequestData(reqTAG!!, requestUrl, method, requestBody, headers),
+                RequestData(reqTAG!!, requestUrl, method, requestBody?:SimpleRequestBody(), headers),
                 priority, retryPolicy,
                 KineCacheControl(networkPolicy, cacheMaxAge,timeUnit),
                 logLevel,
@@ -95,7 +95,7 @@ open class KineRequest private constructor(builder: Builder) {
         } else {
             Request(
                 kineClient, converter,
-                RequestData(reqTAG!!, requestUrl, method, requestBody, headers),
+                RequestData(reqTAG!!, requestUrl, method, requestBody?:SimpleRequestBody(), headers),
                 priority, retryPolicy, KineCacheControl(networkPolicy, cacheMaxAge,timeUnit),
                 logLevel, executor
             )
@@ -139,9 +139,9 @@ open class KineRequest private constructor(builder: Builder) {
     companion object {
         @Suppress("unused")
         fun clone(copy: KineRequest): KineRequest {
-            val builder = Builder()
+            val builder = RequestBuilder()
             builder.method = copy.method
-            builder.requestUrl = copy.requestUrl
+            builder.url = copy.requestUrl
             builder.requestBody = copy.requestBody
             builder.retryPolicy = copy.retryPolicy
             builder.priority = copy.priority
@@ -156,34 +156,35 @@ open class KineRequest private constructor(builder: Builder) {
             return KineRequest(builder)
         }
 
-        fun post(params: String?): IBuildUrl {
-            return Builder().post(params)
+        fun post(url: String): RequestEncodedBodyBuilder {
+            return RequestHttpMethodBuilder().post(url)
         }
 
-        fun delete(params: String?): IBuildUrl {
-            return Builder().delete(params)
+        fun delete(url: String): RequestEncodedBodyBuilder {
+            return RequestHttpMethodBuilder().delete(url)
         }
 
-        fun put(params: String?): IBuildUrl {
-            return Builder().put(params)
+        fun put(url: String): RequestEncodedBodyBuilder {
+            return RequestHttpMethodBuilder().put(url)
         }
 
-        fun patch(params: String?): IBuildUrl {
-            return Builder().patch(params)
+        fun patch(url: String): RequestEncodedBodyBuilder {
+            return RequestHttpMethodBuilder().patch(url)
         }
 
-        fun get(): IBuildUrl {
-            return Builder().get()
+        fun get(url: String): RequestOptionsBuilder {
+            return RequestHttpMethodBuilder().get(url)
         }
 
-        fun head(): IBuildUrl {
-            return Builder().head()
+        fun head(url: String): RequestOptionsBuilder {
+            return RequestHttpMethodBuilder().head(url)
         }
-
-        fun method(method: Int): IBuildUrl {
-            return Builder().method(method)
+        fun upload(url: String): RequestMultiPartBodyBuilder {
+            return RequestHttpMethodBuilder().upload(url)
         }
-
+        fun method(url: String,method: Int): RequestOptionsBuilder {
+            return RequestHttpMethodBuilder().method(url,method)
+        }
     }
 
     /**
@@ -199,34 +200,149 @@ open class KineRequest private constructor(builder: Builder) {
             const val PATCH = 5
         }
     }
+    class RequestMultiPartBodyBuilder(url: String = "",method:Int = Method.GET):RequestBuilder(url,method) {
 
-    interface IBuildUrl {
-        fun url(url: String): IBuildOptions
+        fun addMultiPartParam(key: String, value: String, contentType: String?): RequestMultiPartBodyBuilder {
+            requestBody =  requestBody?: MultiPartRequestBody()
+            if(requestBody is MultiPartRequestBody) {
+                (this.requestBody!! as MultiPartRequestBody).addMultiPartParam(key, value, contentType)
+            }else{
+                throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
+            }
+            return this
+        }
+
+        fun addMultiPartFileParam(key: String, value: File, contentType: String?): RequestMultiPartBodyBuilder {
+            requestBody =  requestBody?: MultiPartRequestBody()
+            if(requestBody is MultiPartRequestBody) {
+                (this.requestBody!! as MultiPartRequestBody).addMultiPartFileParam(key, value, contentType)
+            }else{
+                throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
+            }
+            return this
+        }
+
+        fun addMultiPartParams(parts: HashMap<String, String>, contentType: String?): RequestMultiPartBodyBuilder {
+            requestBody =  requestBody?: MultiPartRequestBody()
+            if(requestBody is MultiPartRequestBody) {
+                (this.requestBody!! as MultiPartRequestBody)
+                    .addMultiPartParams(parts, contentType)
+            }else{
+                throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
+            }
+            return this
+        }
+
+        fun addMultiPartFileParams(parts: HashMap<String, File>, contentType: String?): RequestMultiPartBodyBuilder {
+            requestBody =  requestBody?: MultiPartRequestBody()
+            if(requestBody is MultiPartRequestBody) {
+                (this.requestBody!! as MultiPartRequestBody)
+                    .addMultiPartFileParams(parts, contentType)
+            }else{
+                throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
+            }
+            return this
+        }
+        fun addMultiPartFileListParams(parts: HashMap<String, List<File>>, contentType: String?): RequestMultiPartBodyBuilder {
+            requestBody =  requestBody?: MultiPartRequestBody()
+            if(requestBody is MultiPartRequestBody) {
+                (this.requestBody!! as MultiPartRequestBody)
+                    .addMultiPartFileListParams(parts, contentType)
+            }else{
+                throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
+            }
+            return this
+        }
+        fun contentType(contentType: String): RequestMultiPartBodyBuilder {
+            requestBody = requestBody?: MultiPartRequestBody()
+            this.requestBody?.setContentType(contentType)
+            return this
+        }
+    }
+    class RequestEncodedBodyBuilder(url: String = "",method:Int = Method.GET):RequestBodyBuilder(url,method) {
+        fun bodyParams(params: HashMap<String, String>?): RequestEncodedBodyBuilder {
+            requestBody =  requestBody?: EncodedRequestBody()
+            if(requestBody is EncodedRequestBody) {
+                (this.requestBody!! as EncodedRequestBody).setBody(params)
+            }else{
+                throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
+            }
+            return this
+        }
+
+        fun addBodyParam(key: String, value: String): RequestEncodedBodyBuilder {
+            requestBody =  requestBody?: EncodedRequestBody()
+            if(requestBody is EncodedRequestBody) {
+                (this.requestBody!! as EncodedRequestBody).addBodyParam(key,value)
+            }else{
+                throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
+            }
+            return this
+        }
+
+        fun addEncodedBodyParam(key: String, value: String): RequestEncodedBodyBuilder {
+            requestBody =  requestBody?: EncodedRequestBody()
+            if(requestBody is EncodedRequestBody) {
+                (this.requestBody!! as EncodedRequestBody).addBodyParamEncoded(key,value)
+            }else{
+                throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
+            }
+            return this
+        }
+
+        fun encodedBodyParams(params: HashMap<String, String>?): RequestEncodedBodyBuilder {
+            requestBody =  requestBody?: EncodedRequestBody()
+            if(requestBody is EncodedRequestBody) {
+                (this.requestBody!! as EncodedRequestBody).setBodyEncoded(params)
+            }else{
+                throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
+            }
+            return this
+        }
     }
 
-    interface IBuildOptions {
-        fun addHeader(key: String, value: String): IBuildOptions
-        fun headers(headers: HashMap<String, String?>?): IBuildOptions
-        fun userAgent(userAgent: String): IBuildOptions
-        fun contentType(contentType: String): IBuildOptions
-        fun bodyParams(params: String?, contentType: String = ContentType.JSON.toString()): IBuildOptions
-        fun addBodyParam(key: String, value: String): IBuildOptions
-        fun addEncodedBodyParam(key: String, value: String): IBuildOptions
-        fun bodyParams(params: HashMap<String, String>?): IBuildOptions
-        fun encodedBodyParams(params: HashMap<String, String>?): IBuildOptions
-        fun addQueryParam(key: String, value: String): IBuildOptions
-        fun queryParams(params: HashMap<String, String?>?): IBuildOptions
-        fun tag(tag: String): IBuildOptions
-        fun client(kineClient: KineClient?): IBuildOptions
-        fun converter(converter: Converter?): IBuildOptions
-        fun logLevel(level: Int): IBuildOptions
-        fun notFromCache(): IBuildOptions
-        fun doNotCache(): IBuildOptions
-        fun onlyFromCache(): IBuildOptions
-        fun onlyFromNetwork(): IBuildOptions
-        fun cacheMaxAge(time: Int, timeUnit: TimeUnit): IBuildOptions
-        fun priority(priority: Priority): IBuildOptions
-        fun retryPolicy(retryPolicy: RetryPolicy?): IBuildOptions
+    open class RequestBodyBuilder(url: String = "",method:Int = Method.GET):RequestBuilder(url,method) {
+
+        fun contentType(contentType: String): RequestBodyBuilder {
+            requestBody = requestBody?: SimpleRequestBody()
+            this.requestBody?.setContentType(contentType)
+            return this
+        }
+        /**
+         * Sets the `bodyParams` and returns a reference to `RequestOptionsBuilder`
+         *
+         * @param params the `bodyParams` to set
+         * @param contentType the encoding mediaType to use
+         * @return a reference to this RequestBuilder
+         */
+        fun bodyParams(params: String?, contentType: String=ContentType.JSON.toString()): RequestBodyBuilder {
+            requestBody =  requestBody?: StringRequestBody()
+            if(requestBody is StringRequestBody) {
+                (this.requestBody!! as StringRequestBody).setBody(params, contentType)
+            }else{
+                throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
+            }
+            return this
+        }
+
+    }
+    interface RequestOptionsBuilder {
+        fun addHeader(key: String, value: String): RequestOptionsBuilder
+        fun headers(headers: HashMap<String, String?>?): RequestOptionsBuilder
+        fun userAgent(userAgent: String): RequestOptionsBuilder
+        fun addQueryParam(key: String, value: String): RequestOptionsBuilder
+        fun queryParams(params: HashMap<String, String?>?): RequestOptionsBuilder
+        fun tag(tag: String): RequestOptionsBuilder
+        fun client(kineClient: KineClient?): RequestOptionsBuilder
+        fun converter(converter: Converter?): RequestOptionsBuilder
+        fun logLevel(level: Int): RequestOptionsBuilder
+        fun notFromCache(): RequestOptionsBuilder
+        fun doNotCache(): RequestOptionsBuilder
+        fun onlyFromCache(): RequestOptionsBuilder
+        fun onlyFromNetwork(): RequestOptionsBuilder
+        fun cacheMaxAge(time: Int, timeUnit: TimeUnit): RequestOptionsBuilder
+        fun priority(priority: Priority): RequestOptionsBuilder
+        fun retryPolicy(retryPolicy: RetryPolicy?): RequestOptionsBuilder
         fun <F> responseAs(clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError)
         fun <F> responseAs(clazz: KineClass<F>, onSuccess: OnSuccess<F>, onError: OnError)
         @Throws(Throwable::class)
@@ -238,40 +354,29 @@ open class KineRequest private constructor(builder: Builder) {
         fun build(): KineRequest
     }
 
-    interface IBuildRequestType {
-        fun post(
-            params: String? = null,
-            contentType: String = ContentType.JSON.toString()
-        ): IBuildUrl
+    interface RequestTypeBuilder {
+        fun post(url: String): RequestEncodedBodyBuilder
 
-        fun put(
-            params: String? = null,
-            contentType: String = ContentType.JSON.toString()
-        ): IBuildUrl
+        fun put(url: String): RequestEncodedBodyBuilder
 
-        fun patch(
-            params: String? = null,
-            contentType: String = ContentType.JSON.toString()
-        ): IBuildUrl
+        fun patch(url: String): RequestEncodedBodyBuilder
 
-        fun delete(
-            params: String? = null,
-            contentType: String = ContentType.JSON.toString()
-        ): IBuildUrl
+        fun delete(url: String): RequestEncodedBodyBuilder
 
-        fun get(): IBuildUrl
+        fun get(url: String): RequestOptionsBuilder
 
-        fun head(): IBuildUrl
+        fun head(url: String): RequestOptionsBuilder
 
-        fun method(method: Int): IBuildUrl
+        fun method(url: String,method: Int): RequestOptionsBuilder
+
+        fun upload(url: String): RequestMultiPartBodyBuilder
     }
 
     /**
-     * `KineRequest` builder static inner class.
+     * `KineRequest` requestBuilder static inner class.
      */
-    class Builder : IBuildRequestType {
-        var method = Method.GET
-        var requestUrl: String = ""
+    open class RequestBuilder(var url: String = "", var method:Int = Method.GET) :RequestOptionsBuilder {
+
         var kineClient: KineClient? = null
         var converter: Converter? = null
         var retryPolicy: RetryPolicy? = null
@@ -282,248 +387,190 @@ open class KineRequest private constructor(builder: Builder) {
         var priority: Priority = Priority.IMMEDIATE
         var headers: HashMap<String, String?>? = null
         var executor: Executor = KineExecutorManager.executorSupplier.forNetworkTasks()
-        var requestBody = RequestBody()
+        var requestBody:RequestBody? = SimpleRequestBody()
         var queryParams: HashMap<String, String?>? = null
         var logLevel = LogLevel.NO_LEVEL
         var file: File? = null
         var progressListener: ProgressListener? = null
         val USER_AGENT = "User-Agent"
-        private val iBuildOptions: IBuildOptions = object : IBuildOptions {
 
-            override fun notFromCache(): IBuildOptions {
-                networkPolicy = KineCacheControl.NO_CACHE
-                return this
-            }
-
-            override fun doNotCache(): IBuildOptions {
-                networkPolicy = KineCacheControl.NO_STORE
-                return this
-            }
-            override fun onlyFromCache(): IBuildOptions {
-                networkPolicy = KineCacheControl.FORCE_CACHE
-                return this
-            }
-
-            override fun onlyFromNetwork(): IBuildOptions {
-                networkPolicy = KineCacheControl.FORCE_NETWORK
-                return this
-            }
-            override fun priority(priority: Priority): IBuildOptions {
-                this@Builder.priority = priority
-                return this
-            }
-
-            override fun contentType(contentType: String): IBuildOptions {
-                this@Builder.requestBody.setContentType(contentType)
-                return this
-            }
-
-            /**
-             * Sets the `bodyParams` and returns a reference to `IBuildOptions`
-             *
-             * @param params the `bodyParams` to set
-             * @param contentType the encoding mediaType to use
-             * @return a reference to this Builder
-             */
-            override fun bodyParams(params: String?, contentType: String): IBuildOptions {
-                this@Builder.requestBody.setBody(params,contentType)
-                return this
-            }
-
-            override fun bodyParams(params: HashMap<String, String>?): IBuildOptions {
-                requestBody.setBody(params)
-                return this
-            }
-
-            override fun addBodyParam(key: String, value: String): IBuildOptions {
-                requestBody.addBodyParam(key,value)
-                return this
-            }
-
-            override fun addEncodedBodyParam(key: String, value: String): IBuildOptions {
-                requestBody.addBodyParamEncoded(key, value)
-                return this
-            }
-
-            override fun encodedBodyParams(params: HashMap<String, String>?): IBuildOptions {
-                requestBody.setBodyEncoded(params)
-                return this
-            }
-
-            /**
-             * Sets the `requestHeader` and returns a reference to `IBuildOptions`
-             *
-             * @param headers the `requestHeader` to set
-             * @return a reference to this Builder
-             */
-            override fun headers(headers: HashMap<String, String?>?): IBuildOptions {
-                this@Builder.headers = headers
-                return this
-            }
-
-            override fun addHeader(key: String, value: String): IBuildOptions {
-                headers = headers ?: HashMap()
-                headers!![key] = value
-                return this
-            }
-
-            override fun userAgent(userAgent: String): IBuildOptions {
-                headers = headers ?: HashMap()
-                headers?.put(USER_AGENT, userAgent)
-                return this
-            }
-
-            /**
-             * Sets the `retryPolicy` and returns a reference to `IBuildOptions`
-             *
-             * @param retryPolicy the `retryPolicy` to set
-             * @return a reference to this Builder
-             */
-            override fun retryPolicy(retryPolicy: RetryPolicy?): IBuildOptions {
-                this@Builder.retryPolicy = retryPolicy
-                return this
-            }
-            override fun <F> responseAs(clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError) {
-                 responseAs(DefaultKineClass(clazz), onSuccess, onError)
-            }
-
-            override fun <F> responseAs(clazz: KineClass<F>, onSuccess: OnSuccess<F>, onError: OnError) {
-                build().execute(clazz, onSuccess, onError)
-            }
-
-            override fun <F> responseAs(clazz: Class<F>): KineResponse<F>? {
-                return build().execute(DefaultKineClass(clazz))
-            }
-
-            override fun <F> responseAs(clazz: KineClass<F>): KineResponse<F>? {
-                return build().execute(clazz)
-            }
-
-            override fun downloadFile(
-                file: File,
-                progressListener: ProgressListener,
-                onSuccess: OnSuccess<File>?,
-                onError: OnError
-            ) {
-                this@Builder.file = file
-                this@Builder.progressListener = progressListener
-                converter(FileDownloadConverter())
-                build().execute(DefaultKineClass(File::class.java), onSuccess, onError)
-            }
-
-            override fun downloadFile(file: File, progressListener: ProgressListener): KineResponse<File>? {
-                this@Builder.file = file
-                this@Builder.progressListener = progressListener
-                converter(FileDownloadConverter())
-                return build().execute(DefaultKineClass(File::class.java))
-            }
-
-            override fun addQueryParam(key: String, value: String): IBuildOptions {
-                queryParams = queryParams ?: HashMap()
-                queryParams!![key] = value
-                return this
-            }
-
-            override fun queryParams(params: HashMap<String, String?>?): IBuildOptions {
-                queryParams = params
-                return this
-            }
-
-            override fun cacheMaxAge(time: Int, timeUnit: TimeUnit): IBuildOptions {
-                cacheMaxAge = time
-                this@Builder.timeUnit = timeUnit
-                return this
-            }
-
-            override fun client(kineClient: KineClient?): IBuildOptions {
-                this@Builder.kineClient = kineClient
-                return this
-            }
-
-            override fun converter(converter: Converter?): IBuildOptions {
-                this@Builder.converter = converter
-                return this
-            }
-
-            override fun logLevel(level: Int): IBuildOptions {
-                logLevel = level
-                return this
-            }
-
-            override fun tag(tag: String): IBuildOptions {
-                reqTAG = tag
-                return this
-            }
-
-            /**
-             * Returns a `RequestBuilder` built from the parameters previously set.
-             *
-             * @return a `RequestBuilder` built with parameters of this `RequestBuilder.Builder`
-             */
-            override fun build(): KineRequest {
-                return KineRequest(this@Builder)
-            }
-
-
-        }
-        private val iBuildUrl: IBuildUrl = object : IBuildUrl {
-            /**
-             * Sets the `requestUrl` and returns a reference to `IJsonObject`
-             *
-             * @param url the `requestUrl` to set
-             * @return a reference to this Builder
-             */
-            override fun url(url: String): IBuildOptions {
-                requestUrl = url
-                return iBuildOptions
-            }
+        override fun notFromCache(): RequestOptionsBuilder {
+            networkPolicy = KineCacheControl.NO_CACHE
+            return this
         }
 
-        override fun post(params: String?, contentType: String): IBuildUrl {
-            this@Builder.requestBody.setBody(params,contentType)
-            method(Method.POST)
-            return iBuildUrl
+        override fun doNotCache(): RequestOptionsBuilder {
+            networkPolicy = KineCacheControl.NO_STORE
+            return this
+        }
+        override fun onlyFromCache(): RequestOptionsBuilder {
+            networkPolicy = KineCacheControl.FORCE_CACHE
+            return this
         }
 
-        override fun put(params: String?, contentType: String): IBuildUrl {
-            this@Builder.requestBody.setBody(params,contentType)
-            method(Method.PUT)
-            return iBuildUrl
+        override fun onlyFromNetwork(): RequestOptionsBuilder {
+            networkPolicy = KineCacheControl.FORCE_NETWORK
+            return this
         }
-
-        override fun patch(params: String?, contentType: String): IBuildUrl {
-            this@Builder.requestBody.setBody(params,contentType)
-            method(Method.PATCH)
-            return iBuildUrl
-        }
-
-        override fun delete(params: String?, contentType: String): IBuildUrl {
-            this@Builder.requestBody.setBody(params,contentType)
-            method(Method.DELETE)
-            return iBuildUrl
-        }
-
-        override fun get(): IBuildUrl {
-            method(Method.GET)
-            return iBuildUrl
-        }
-
-        override fun head(): IBuildUrl {
-            method(Method.HEAD)
-            return iBuildUrl
+        override fun priority(priority: Priority): RequestOptionsBuilder {
+            this@RequestBuilder.priority = priority
+            return this
         }
 
         /**
-         * Sets the `method` and returns a reference to `IRequestUrl`
+         * Sets the `requestHeader` and returns a reference to `RequestOptionsBuilder`
          *
-         * @param method the `method` to set
-         * @return a reference to this Builder
+         * @param headers the `requestHeader` to set
+         * @return a reference to this RequestBuilder
          */
-        override fun method(method: Int): IBuildUrl {
-            this.method = method
-            return iBuildUrl
+        override fun headers(headers: HashMap<String, String?>?): RequestOptionsBuilder {
+            this@RequestBuilder.headers = headers
+            return this
         }
+
+        override fun addHeader(key: String, value: String): RequestOptionsBuilder {
+            headers = headers ?: HashMap()
+            headers!![key] = value
+            return this
+        }
+
+        override fun userAgent(userAgent: String): RequestOptionsBuilder {
+            headers = headers ?: HashMap()
+            headers?.put(USER_AGENT, userAgent)
+            return this
+        }
+
+        /**
+         * Sets the `retryPolicy` and returns a reference to `RequestOptionsBuilder`
+         *
+         * @param retryPolicy the `retryPolicy` to set
+         * @return a reference to this RequestBuilder
+         */
+        override fun retryPolicy(retryPolicy: RetryPolicy?): RequestOptionsBuilder {
+            this@RequestBuilder.retryPolicy = retryPolicy
+            return this
+        }
+        override fun <F> responseAs(clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError) {
+            responseAs(DefaultKineClass(clazz), onSuccess, onError)
+        }
+
+        override fun <F> responseAs(clazz: KineClass<F>, onSuccess: OnSuccess<F>, onError: OnError) {
+            build().execute(clazz, onSuccess, onError)
+        }
+
+        override fun <F> responseAs(clazz: Class<F>): KineResponse<F>? {
+            return build().execute(DefaultKineClass(clazz))
+        }
+
+        override fun <F> responseAs(clazz: KineClass<F>): KineResponse<F>? {
+            return build().execute(clazz)
+        }
+
+        override fun downloadFile(
+            file: File,
+            progressListener: ProgressListener,
+            onSuccess: OnSuccess<File>?,
+            onError: OnError
+        ) {
+            this@RequestBuilder.file = file
+            this@RequestBuilder.progressListener = progressListener
+            converter(FileDownloadConverter())
+            build().execute(DefaultKineClass(File::class.java), onSuccess, onError)
+        }
+
+        override fun downloadFile(file: File, progressListener: ProgressListener): KineResponse<File>? {
+            this@RequestBuilder.file = file
+            this@RequestBuilder.progressListener = progressListener
+            converter(FileDownloadConverter())
+            return build().execute(DefaultKineClass(File::class.java))
+        }
+
+        override fun addQueryParam(key: String, value: String): RequestOptionsBuilder {
+            queryParams = queryParams ?: HashMap()
+            queryParams!![key] = value
+            return this
+        }
+
+        override fun queryParams(params: HashMap<String, String?>?): RequestOptionsBuilder {
+            queryParams = params
+            return this
+        }
+
+        override fun cacheMaxAge(time: Int, timeUnit: TimeUnit): RequestOptionsBuilder {
+            cacheMaxAge = time
+            this@RequestBuilder.timeUnit = timeUnit
+            return this
+        }
+
+        override fun client(kineClient: KineClient?): RequestOptionsBuilder {
+            this@RequestBuilder.kineClient = kineClient
+            return this
+        }
+
+        override fun converter(converter: Converter?): RequestOptionsBuilder {
+            this@RequestBuilder.converter = converter
+            return this
+        }
+
+        override fun logLevel(level: Int): RequestOptionsBuilder {
+            logLevel = level
+            return this
+        }
+
+        override fun tag(tag: String): RequestOptionsBuilder {
+            reqTAG = tag
+            return this
+        }
+
+        /**
+         * Returns a `RequestBuilder` built from the parameters previously set.
+         *
+         * @return a `RequestBuilder` built with parameters of this `RequestBuilder.RequestBuilder`
+         */
+        override fun build(): KineRequest {
+            return KineRequest(this@RequestBuilder)
+        }
+
     }
 
+    class RequestHttpMethodBuilder :RequestTypeBuilder {
+        override fun post(url: String): RequestEncodedBodyBuilder {
+            return RequestEncodedBodyBuilder(url, Method.POST)
+        }
 
+        override fun put(url: String): RequestEncodedBodyBuilder {
+            return RequestEncodedBodyBuilder(url, Method.PUT)
+        }
+
+        override fun patch(url: String): RequestEncodedBodyBuilder {
+            return RequestEncodedBodyBuilder(url, Method.PATCH)
+        }
+
+        override fun delete(url: String): RequestEncodedBodyBuilder {
+            return RequestEncodedBodyBuilder(url,Method.DELETE)
+        }
+
+        override fun get(url: String): RequestOptionsBuilder {
+            return method(url, Method.GET)
+
+        }
+
+        override fun head(url: String): RequestOptionsBuilder {
+            return method(url, Method.HEAD)
+        }
+        /**
+         * Sets the `method` and returns a reference to `RequestOptionsBuilder`
+         *
+         * @param method the `method` to set
+         * @return a reference to this RequestBuilder
+         */
+        override fun method(url: String, method: Int): RequestOptionsBuilder {
+            return if(method==Method.HEAD || method==Method.GET)
+                RequestBuilder(url,method) else RequestEncodedBodyBuilder(url,method)
+        }
+
+        override fun upload(url: String): RequestMultiPartBodyBuilder {
+            return RequestMultiPartBodyBuilder(url, Method.POST)
+        }
+    }
 }
