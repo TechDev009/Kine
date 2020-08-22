@@ -45,7 +45,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
     private var reqTAG: String?
     private var networkPolicy = 0
     private val cacheMaxAge: Int
-    private var timeUnit:TimeUnit=TimeUnit.SECONDS
+    private var timeUnit: TimeUnit = TimeUnit.SECONDS
     private val headers: HashMap<String, String?>?
     private val queryParams: HashMap<String, String?>?
     private var executor: Executor = KineExecutorManager.executorSupplier.forNetworkTasks()
@@ -62,7 +62,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
         networkPolicy = requestBuilder.networkPolicy
         priority = requestBuilder.priority
         cacheMaxAge = requestBuilder.cacheMaxAge
-        timeUnit= requestBuilder.timeUnit
+        timeUnit = requestBuilder.timeUnit
         headers = requestBuilder.headers
         queryParams = requestBuilder.queryParams
         kineClient = requestBuilder.kineClient
@@ -86,17 +86,43 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
             DownloadRequest(
                 file!!,
                 progressListener!!, kineClient, converter,
-                RequestData(reqTAG!!, requestUrl, method, requestBody?:SimpleRequestBody(), headers),
+                RequestData(
+                    reqTAG!!,
+                    requestUrl,
+                    method,
+                    requestBody ?: SimpleRequestBody(),
+                    headers
+                ),
                 priority, retryPolicy,
-                KineCacheControl(networkPolicy, cacheMaxAge,timeUnit),
+                KineCacheControl(networkPolicy, cacheMaxAge, timeUnit),
                 logLevel,
                 executor
+            )
+        } else if (requestBody!=null && requestBody is MultiPartRequestBody) {
+            UploadRequest(
+                progressListener,
+                kineClient, converter,
+                RequestData(
+                    reqTAG!!,
+                    requestUrl,
+                    method,
+                    requestBody,
+                    headers
+                ),
+                priority, retryPolicy, KineCacheControl(networkPolicy, cacheMaxAge, timeUnit),
+                logLevel, executor
             )
         } else {
             Request(
                 kineClient, converter,
-                RequestData(reqTAG!!, requestUrl, method, requestBody?:SimpleRequestBody(), headers),
-                priority, retryPolicy, KineCacheControl(networkPolicy, cacheMaxAge,timeUnit),
+                RequestData(
+                    reqTAG!!,
+                    requestUrl,
+                    method,
+                    requestBody ?: SimpleRequestBody(),
+                    headers
+                ),
+                priority, retryPolicy, KineCacheControl(networkPolicy, cacheMaxAge, timeUnit),
                 logLevel, executor
             )
         }
@@ -179,11 +205,13 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
         fun head(url: String): RequestOptionsBuilder {
             return RequestHttpMethodBuilder().head(url)
         }
+
         fun upload(url: String): RequestMultiPartBodyBuilder {
             return RequestHttpMethodBuilder().upload(url)
         }
-        fun method(url: String,method: Int): RequestOptionsBuilder {
-            return RequestHttpMethodBuilder().method(url,method)
+
+        fun method(url: String, method: Int): RequestOptionsBuilder {
+            return RequestHttpMethodBuilder().method(url, method)
         }
     }
 
@@ -200,114 +228,152 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
             const val PATCH = 5
         }
     }
-    class RequestMultiPartBodyBuilder(url: String = "",method:Int = Method.GET):RequestBuilder(url,method) {
 
-        fun addMultiPartParam(key: String, value: String, contentType: String?): RequestMultiPartBodyBuilder {
-            requestBody =  requestBody?: MultiPartRequestBody()
-            if(requestBody is MultiPartRequestBody) {
-                (this.requestBody!! as MultiPartRequestBody).addMultiPartParam(key, value, contentType)
-            }else{
+    class RequestMultiPartBodyBuilder(url: String = "", method: Int = Method.GET) : RequestBuilder(url, method) {
+        init {
+            requestBody = MultiPartRequestBody()
+        }
+        fun addMultiPartParam(
+            key: String,
+            value: String,
+            contentType: String?
+        ): RequestMultiPartBodyBuilder {
+            requestBody = requestBody ?: MultiPartRequestBody()
+            if (requestBody is MultiPartRequestBody) {
+                (this.requestBody!! as MultiPartRequestBody).addMultiPartParam(
+                    key,
+                    value,
+                    contentType
+                )
+            } else {
                 throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
             }
             return this
         }
 
-        fun addMultiPartFileParam(key: String, value: File, contentType: String?): RequestMultiPartBodyBuilder {
-            requestBody =  requestBody?: MultiPartRequestBody()
-            if(requestBody is MultiPartRequestBody) {
-                (this.requestBody!! as MultiPartRequestBody).addMultiPartFileParam(key, value, contentType)
-            }else{
+        fun addMultiPartFileParam(
+            key: String,
+            value: File,
+            contentType: String?
+        ): RequestMultiPartBodyBuilder {
+            requestBody = requestBody ?: MultiPartRequestBody()
+            if (requestBody is MultiPartRequestBody) {
+                (this.requestBody!! as MultiPartRequestBody).addMultiPartFileParam(
+                    key,
+                    value,
+                    contentType
+                )
+            } else {
                 throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
             }
             return this
         }
 
-        fun addMultiPartParams(parts: HashMap<String, String>, contentType: String?): RequestMultiPartBodyBuilder {
-            requestBody =  requestBody?: MultiPartRequestBody()
-            if(requestBody is MultiPartRequestBody) {
+        fun addMultiPartParams(
+            parts: HashMap<String, String>,
+            contentType: String?
+        ): RequestMultiPartBodyBuilder {
+            requestBody = requestBody ?: MultiPartRequestBody()
+            if (requestBody is MultiPartRequestBody) {
                 (this.requestBody!! as MultiPartRequestBody)
                     .addMultiPartParams(parts, contentType)
-            }else{
+            } else {
                 throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
             }
             return this
         }
 
-        fun addMultiPartFileParams(parts: HashMap<String, File>, contentType: String?): RequestMultiPartBodyBuilder {
-            requestBody =  requestBody?: MultiPartRequestBody()
-            if(requestBody is MultiPartRequestBody) {
+        fun addMultiPartFileParams(
+            parts: HashMap<String, File>,
+            contentType: String?
+        ): RequestMultiPartBodyBuilder {
+            requestBody = requestBody ?: MultiPartRequestBody()
+            if (requestBody is MultiPartRequestBody) {
                 (this.requestBody!! as MultiPartRequestBody)
                     .addMultiPartFileParams(parts, contentType)
-            }else{
+            } else {
                 throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
             }
             return this
         }
-        fun addMultiPartFileListParams(parts: HashMap<String, List<File>>, contentType: String?): RequestMultiPartBodyBuilder {
-            requestBody =  requestBody?: MultiPartRequestBody()
-            if(requestBody is MultiPartRequestBody) {
+
+        fun addMultiPartFileListParams(
+            parts: HashMap<String, List<File>>,
+            contentType: String?
+        ): RequestMultiPartBodyBuilder {
+            requestBody = requestBody ?: MultiPartRequestBody()
+            if (requestBody is MultiPartRequestBody) {
                 (this.requestBody!! as MultiPartRequestBody)
                     .addMultiPartFileListParams(parts, contentType)
-            }else{
+            } else {
                 throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
             }
             return this
         }
+        fun setUploadListener(progressListener: ProgressListener): RequestMultiPartBodyBuilder {
+            this.progressListener = progressListener
+            return this
+        }
+
         fun contentType(contentType: String): RequestMultiPartBodyBuilder {
-            requestBody = requestBody?: MultiPartRequestBody()
+            requestBody = requestBody ?: MultiPartRequestBody()
             this.requestBody?.setContentType(contentType)
             return this
         }
     }
-    class RequestEncodedBodyBuilder(url: String = "",method:Int = Method.GET):RequestBodyBuilder(url,method) {
+
+    class RequestEncodedBodyBuilder(url: String = "", method: Int = Method.GET) :
+        RequestBodyBuilder(url, method) {
         fun bodyParams(params: HashMap<String, String>?): RequestEncodedBodyBuilder {
-            requestBody =  requestBody?: EncodedRequestBody()
-            if(requestBody is EncodedRequestBody) {
+            requestBody = requestBody ?: EncodedRequestBody()
+            if (requestBody is EncodedRequestBody) {
                 (this.requestBody!! as EncodedRequestBody).setBody(params)
-            }else{
+            } else {
                 throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
             }
             return this
         }
 
         fun addBodyParam(key: String, value: String): RequestEncodedBodyBuilder {
-            requestBody =  requestBody?: EncodedRequestBody()
-            if(requestBody is EncodedRequestBody) {
-                (this.requestBody!! as EncodedRequestBody).addBodyParam(key,value)
-            }else{
+            requestBody = requestBody ?: EncodedRequestBody()
+            if (requestBody is EncodedRequestBody) {
+                (this.requestBody!! as EncodedRequestBody).addBodyParam(key, value)
+            } else {
                 throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
             }
             return this
         }
 
         fun addEncodedBodyParam(key: String, value: String): RequestEncodedBodyBuilder {
-            requestBody =  requestBody?: EncodedRequestBody()
-            if(requestBody is EncodedRequestBody) {
-                (this.requestBody!! as EncodedRequestBody).addBodyParamEncoded(key,value)
-            }else{
+            requestBody = requestBody ?: EncodedRequestBody()
+            if (requestBody is EncodedRequestBody) {
+                (this.requestBody!! as EncodedRequestBody).addBodyParamEncoded(key, value)
+            } else {
                 throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
             }
             return this
         }
 
         fun encodedBodyParams(params: HashMap<String, String>?): RequestEncodedBodyBuilder {
-            requestBody =  requestBody?: EncodedRequestBody()
-            if(requestBody is EncodedRequestBody) {
+            requestBody = requestBody ?: EncodedRequestBody()
+            if (requestBody is EncodedRequestBody) {
                 (this.requestBody!! as EncodedRequestBody).setBodyEncoded(params)
-            }else{
+            } else {
                 throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
             }
             return this
         }
     }
 
-    open class RequestBodyBuilder(url: String = "",method:Int = Method.GET):RequestBuilder(url,method) {
+    open class RequestBodyBuilder(url: String = "", method: Int = Method.GET) :
+        RequestBuilder(url, method) {
 
         fun contentType(contentType: String): RequestBodyBuilder {
-            requestBody = requestBody?: SimpleRequestBody()
+            requestBody = requestBody ?: SimpleRequestBody()
             this.requestBody?.setContentType(contentType)
             return this
         }
+
         /**
          * Sets the `bodyParams` and returns a reference to `RequestOptionsBuilder`
          *
@@ -315,17 +381,21 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
          * @param contentType the encoding mediaType to use
          * @return a reference to this RequestBuilder
          */
-        fun bodyParams(params: String?, contentType: String=ContentType.JSON.toString()): RequestBodyBuilder {
-            requestBody =  requestBody?: StringRequestBody()
-            if(requestBody is StringRequestBody) {
+        fun bodyParams(
+            params: String?,
+            contentType: String = ContentType.JSON.toString()
+        ): RequestBodyBuilder {
+            requestBody = requestBody ?: StringRequestBody()
+            if (requestBody is StringRequestBody) {
                 (this.requestBody!! as StringRequestBody).setBody(params, contentType)
-            }else{
+            } else {
                 throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
             }
             return this
         }
 
     }
+
     interface RequestOptionsBuilder {
         fun addHeader(key: String, value: String): RequestOptionsBuilder
         fun headers(headers: HashMap<String, String?>?): RequestOptionsBuilder
@@ -345,12 +415,20 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
         fun retryPolicy(retryPolicy: RetryPolicy?): RequestOptionsBuilder
         fun <F> responseAs(clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError)
         fun <F> responseAs(clazz: KineClass<F>, onSuccess: OnSuccess<F>, onError: OnError)
+
         @Throws(Throwable::class)
         fun <F> responseAs(clazz: Class<F>): KineResponse<F>?
+
         @Throws(Throwable::class)
         fun <F> responseAs(clazz: KineClass<F>): KineResponse<F>?
-        fun downloadFile(file: File, progressListener: ProgressListener, onSuccess: OnSuccess<File>? = null, onError: OnError)
-        fun downloadFile(file: File, progressListener: ProgressListener):KineResponse<File>?
+        fun downloadFile(
+            file: File,
+            progressListener: ProgressListener,
+            onSuccess: OnSuccess<File>? = null,
+            onError: OnError
+        )
+
+        fun downloadFile(file: File, progressListener: ProgressListener): KineResponse<File>?
         fun build(): KineRequest
     }
 
@@ -367,7 +445,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
 
         fun head(url: String): RequestOptionsBuilder
 
-        fun method(url: String,method: Int): RequestOptionsBuilder
+        fun method(url: String, method: Int): RequestOptionsBuilder
 
         fun upload(url: String): RequestMultiPartBodyBuilder
     }
@@ -375,7 +453,8 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
     /**
      * `KineRequest` requestBuilder static inner class.
      */
-    open class RequestBuilder(var url: String = "", var method:Int = Method.GET) :RequestOptionsBuilder {
+    open class RequestBuilder(var url: String = "", var method: Int = Method.GET) :
+        RequestOptionsBuilder {
 
         var kineClient: KineClient? = null
         var converter: Converter? = null
@@ -383,11 +462,11 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
         var reqTAG: String? = null
         var networkPolicy = 0
         var cacheMaxAge: Int = 0
-        var timeUnit:TimeUnit=TimeUnit.SECONDS
+        var timeUnit: TimeUnit = TimeUnit.SECONDS
         var priority: Priority = Priority.IMMEDIATE
         var headers: HashMap<String, String?>? = null
         var executor: Executor = KineExecutorManager.executorSupplier.forNetworkTasks()
-        var requestBody:RequestBody? = SimpleRequestBody()
+        var requestBody: RequestBody? = SimpleRequestBody()
         var queryParams: HashMap<String, String?>? = null
         var logLevel = LogLevel.NO_LEVEL
         var file: File? = null
@@ -403,6 +482,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
             networkPolicy = KineCacheControl.NO_STORE
             return this
         }
+
         override fun onlyFromCache(): RequestOptionsBuilder {
             networkPolicy = KineCacheControl.FORCE_CACHE
             return this
@@ -412,6 +492,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
             networkPolicy = KineCacheControl.FORCE_NETWORK
             return this
         }
+
         override fun priority(priority: Priority): RequestOptionsBuilder {
             this@RequestBuilder.priority = priority
             return this
@@ -450,11 +531,16 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
             this@RequestBuilder.retryPolicy = retryPolicy
             return this
         }
+
         override fun <F> responseAs(clazz: Class<F>, onSuccess: OnSuccess<F>, onError: OnError) {
             responseAs(DefaultKineClass(clazz), onSuccess, onError)
         }
 
-        override fun <F> responseAs(clazz: KineClass<F>, onSuccess: OnSuccess<F>, onError: OnError) {
+        override fun <F> responseAs(
+            clazz: KineClass<F>,
+            onSuccess: OnSuccess<F>,
+            onError: OnError
+        ) {
             build().execute(clazz, onSuccess, onError)
         }
 
@@ -478,7 +564,10 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
             build().execute(DefaultKineClass(File::class.java), onSuccess, onError)
         }
 
-        override fun downloadFile(file: File, progressListener: ProgressListener): KineResponse<File>? {
+        override fun downloadFile(
+            file: File,
+            progressListener: ProgressListener
+        ): KineResponse<File>? {
             this@RequestBuilder.file = file
             this@RequestBuilder.progressListener = progressListener
             converter(FileDownloadConverter())
@@ -533,7 +622,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
 
     }
 
-    class RequestHttpMethodBuilder :RequestTypeBuilder {
+    class RequestHttpMethodBuilder : RequestTypeBuilder {
         override fun post(url: String): RequestEncodedBodyBuilder {
             return RequestEncodedBodyBuilder(url, Method.POST)
         }
@@ -547,7 +636,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
         }
 
         override fun delete(url: String): RequestEncodedBodyBuilder {
-            return RequestEncodedBodyBuilder(url,Method.DELETE)
+            return RequestEncodedBodyBuilder(url, Method.DELETE)
         }
 
         override fun get(url: String): RequestOptionsBuilder {
@@ -558,6 +647,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
         override fun head(url: String): RequestOptionsBuilder {
             return method(url, Method.HEAD)
         }
+
         /**
          * Sets the `method` and returns a reference to `RequestOptionsBuilder`
          *
@@ -565,8 +655,8 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
          * @return a reference to this RequestBuilder
          */
         override fun method(url: String, method: Int): RequestOptionsBuilder {
-            return if(method==Method.HEAD || method==Method.GET)
-                RequestBuilder(url,method) else RequestEncodedBodyBuilder(url,method)
+            return if (method == Method.HEAD || method == Method.GET)
+                RequestBuilder(url, method) else RequestEncodedBodyBuilder(url, method)
         }
 
         override fun upload(url: String): RequestMultiPartBodyBuilder {

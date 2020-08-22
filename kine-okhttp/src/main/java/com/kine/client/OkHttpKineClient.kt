@@ -98,7 +98,11 @@ open class OkHttpKineClient : KineClient {
                 builder.addHeader(key1, value ?: "")
             }
         }
-        val requestBody = getRequestBody(request.data.body)
+        val requestBody = if(request is UploadRequest){
+             FileProgressRequestBody(getRequestBody(request.data.body),request.progressListener)
+        }else{
+            getRequestBody(request.data.body)
+        }
         Logger.d(TAG, "${request.data.reqTAG} request Json Params: ${requestBody.contentType()}")
         when (request.data.method) {
             KineRequest.Method.GET -> builder.get()
@@ -232,13 +236,13 @@ open class OkHttpKineClient : KineClient {
                 val builder = MultipartBody.Builder()
                     .setType(if (requestBody.mediaType == null) MULTIPART_FORM else requestBody.mediaType.toMediaType())
                 //passing both meta data and file content for uploading
-                requestBody.multiPartParameterMap.apply {
+                requestBody.multiPartParams.apply {
                     for ((key, stringBody) in this.entries) {
                         val mediaType: MediaType? = stringBody.contentType?.toMediaTypeOrNull()
                         builder.addFormDataPart(key,null,stringBody.value.toRequestBody(mediaType))
                     }
                 }
-                for ((key, fileBodies) in requestBody.multiPartFileMap.entries) {
+                for ((key, fileBodies) in requestBody.multiPartFileParams.entries) {
                     for (fileBody in fileBodies) {
                         val fileName: String = fileBody.value.name
                         val mediaType: MediaType? = fileBody.contentType?.toMediaTypeOrNull()

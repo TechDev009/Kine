@@ -11,6 +11,7 @@ import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import com.kine.Kine
+import com.kine.KineRequest
 import com.kine.converters.GsonConverter
 import com.kine.converters.MoshiConverter
 import com.kine.extensions.downloadTo
