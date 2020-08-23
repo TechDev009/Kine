@@ -5,6 +5,7 @@ import java.io.File
 
 
 class FileDownloadConverter : Converter {
+    @Suppress("UNCHECKED_CAST")
     override fun <J> convert(response: Any, request: Request, clazz: Class<J>): J? {
         if (clazz.isAssignableFrom(File::class.java) && response is File) {
             return response as J
