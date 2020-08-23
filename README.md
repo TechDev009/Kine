@@ -57,6 +57,8 @@ dependencies {
 }
 ```
 
+##### Note: Kine will autodetect if android,okhttp,gson or moshi dependency are there and set appropriate client, converter or main thread callback you don't need to specify them,if both moshi and gson are there, kine will add moshi first(converter are always called by add order so if you both dependency and trying to parse it using gson it won't work). To override this behaviour you can set them using `Kine.builder()` as shown below
+
 ## Usage
 
 ### Kine Configuration
@@ -73,14 +75,13 @@ Kine.Builder()
             .build()
 ```
 
-Note: Options provided with individual `KineRequest` will always take priority over `Kine` global configuration except for headers , headers will always be added to individual 
-request headers specified by the user
+##### Note: Options provided with individual `KineRequest` will always take priority over `Kine` global configuration except for headers , headers will always be added to individual request headers specified by the user
 
 
 Kine requests can be made with `KineRequest` class or using one of the `String` or other extension methods.
 If you specify a callback the call is asynchronous, if you don't its synchronous.
 Exception will be thrown in synchronous (you need to catch them).
-Exception will be delivered to onError callback in asynchronous.
+Exception will be delivered to onError callback in asynchronous except for user error like not specifying a converter and expecting a parsed response.
 
 
 ### Get Json
