@@ -3,6 +3,7 @@
 # Kine (Kotlin I/O Networking Extensions)
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.4.0-blue.svg)](https://kotlinlang.org) 
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/AnkitAgrawal967/Kine/blob/master/LICENSE.md)
 
 A simple and powerful HTTP networking library for Kotlin/Android.
 
