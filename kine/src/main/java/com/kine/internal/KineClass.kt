@@ -15,7 +15,7 @@ open class KineClass<T>(val clazz: Class<T>) {
     }
    open fun isAssignableFrom(t: Class<*>): Boolean {
        return clazz.isAssignableFrom(t).apply {
-       //    println(if (this) "Correct type" else "Wrong type")
+           println(if (this) "Correct type" else "Wrong type")
        }
     }
 }

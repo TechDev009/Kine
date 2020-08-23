@@ -2,7 +2,12 @@ package com.kine.log
 
 interface Log {
     fun e(tag: String?, message: String, exception: java.lang.Exception? = null) {
-        println("$tag $message "+exception?.localizedMessage)
+        if(exception!=null) {
+            exception.printStackTrace()
+            println("$tag $message " + exception.localizedMessage)
+        }else{
+            println("$tag $message ")
+        }
     }
 
     fun v(tag: String?, message: String) {

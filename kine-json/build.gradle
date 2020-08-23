@@ -2,21 +2,23 @@ apply plugin: 'java-library'
 apply plugin: 'kotlin'
 ext {
     PUBLISH_GROUP_ID = 'com.kine'
-    PUBLISH_ARTIFACT_ID = 'kine-okhttplegacy'
-    PUBLISH_VERSION = '3.12.12.0'
+    PUBLISH_ARTIFACT_ID = 'kine-json'
+    PUBLISH_VERSION = '1.0.0.0'
 }
 tasks.withType(Javadoc).all {
     enabled = false
 }
+
 apply from: 'https://raw.githubusercontent.com/govindsa1011/maven-upload/master/bintray.gradle'
 apply from: 'https://raw.githack.com/AnkitAgrawal967/Kine/master/publish.gradle'
+
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation("com.squareup.okhttp3:okhttp:3.12.12")
-    implementation("com.squareup.okio:okio:1.17.5")
+    implementation 'org.json:json:20200518'
     implementation project(':kine')
-
-    testImplementation("com.squareup.okhttp3:mockwebserver:3.12.12")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.8.1")
     testImplementation 'junit:junit:4.13'
+    testImplementation 'org.json:json:20200518'
+    testImplementation project(':kine-okhttp')
 }

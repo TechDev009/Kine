@@ -3,7 +3,7 @@ package com.kine.internal
 import com.kine.client.KineClient
 import com.kine.connections.ConnectionChecker
 import com.kine.converters.Converter
-import com.kine.converters.SimpleStringConverter
+import com.kine.converters.RawResponseConverter
 import com.kine.exceptions.*
 import com.kine.extensions.firstResultOrNull
 import com.kine.extensions.getClassInstance
@@ -42,8 +42,8 @@ internal object RequestManager : IRequestManager {
 
     private fun createDefaultConverters(): ArrayList<Converter> {
         return arrayListOf<Converter>().apply {
-            jsonConverterClass.getClassInstance<Converter, SimpleStringConverter>(
-                SimpleStringConverter()
+            jsonConverterClass.getClassInstance<Converter, RawResponseConverter>(
+                RawResponseConverter()
             ).apply {
                 add(this)
             }
@@ -102,7 +102,7 @@ internal object RequestManager : IRequestManager {
             }
         }
         if (kineClients.isNullOrEmpty()) {
-            throw NoClientFoundException("no kineClient set, please set one at least " + "through Kine class")
+            throw NoClientFoundException()
         }
         kineClients?.firstOrNull {
             it.canHandleRequest(request.data.url, request.data.method).apply {
@@ -157,8 +157,11 @@ internal object RequestManager : IRequestManager {
             clazz.isAssignableFrom(InputStream::class.java) -> {
                 InputStream::class.java
             }
-            else -> {
+            clazz.isAssignableFrom(String::class.java) -> {
                 String::class.java
+            }
+            else -> {
+                clazz.clazz
             }
         }
         val response = kineClient.execute(request, responseClazz)
@@ -172,8 +175,7 @@ internal object RequestManager : IRequestManager {
             throw NullResponseException()
         }
         val timer = timerManager.start()
-        val responseValue: F =
-            parseDataToModel(kineResponse.body, request, request.converter, clazz)
+        val responseValue: F = parseDataToModel(kineResponse.body, request, request.converter, clazz)
         val parseResponse = KineResponse(
             responseValue, kineResponse.headers, kineResponse.statusCode,
             kineResponse.networkTimeMs, kineResponse.loadedFrom

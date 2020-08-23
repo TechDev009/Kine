@@ -6,7 +6,7 @@ import com.kine.exceptions.HttpStatusCodeException
 import com.kine.exceptions.NullResponseBodyException
 import com.kine.extensions.getMimeType
 import com.kine.log.Logger
-import com.kine.log.Logger.w
+import com.kine.log.Logger.e
 import com.kine.policies.DefaultRetryPolicy
 import com.kine.policies.RetryPolicy
 import com.kine.request.*
@@ -64,16 +64,21 @@ open class OkHttpKineClient : KineClient {
                     // try the request
                     var response = chain.proceed(request)
                     var tryCount = 0
-
                     while (!response.isSuccessful && tryCount < retryPolicy.getRetryCount()) {
-                        w("intercept", "Request is not successful - $tryCount")
+                        e("intercept", "Request is not successful - $tryCount")
                         tryCount++
                         // Request customization: add request headers
+
                         val requestBuilder = request.newBuilder()
                             .headers(request.headers)
+                            .tag(request.tag())
+                            .cacheControl(request.cacheControl)
+                            .url(request.url)
                             .method(request.method, request.body)
+
                         val newRequest = requestBuilder.build()
                         // retry the request
+                        response.body?.close()
                         response = chain.proceed(newRequest)
                     }
                     // otherwise just pass the original response on
@@ -98,9 +103,9 @@ open class OkHttpKineClient : KineClient {
                 builder.addHeader(key1, value ?: "")
             }
         }
-        val requestBody = if(request is UploadRequest){
-             FileProgressRequestBody(getRequestBody(request.data.body),request.progressListener)
-        }else{
+        val requestBody = if (request is UploadRequest) {
+            FileProgressRequestBody(getRequestBody(request.data.body), request.progressListener)
+        } else {
             getRequestBody(request.data.body)
         }
         Logger.d(TAG, "${request.data.reqTAG} request Json Params: ${requestBody.contentType()}")
@@ -189,7 +194,9 @@ open class OkHttpKineClient : KineClient {
                 body.source()
             }
             else -> {
-                throw com.kine.exceptions.ParseException("unexpected response format")
+                body.string().apply {
+                    Logger.d(TAG, "onResponse String: $this")
+                }
             }
         }
         @Suppress("UNCHECKED_CAST")
@@ -202,8 +209,8 @@ open class OkHttpKineClient : KineClient {
 
 
     override fun cancelAllRequests(tag: String?) {
-        if(tag==null){
-            return client?.dispatcher?.cancelAll()?:Unit
+        if (tag == null) {
+            return client?.dispatcher?.cancelAll() ?: Unit
         }
         val calls = client?.dispatcher?.runningCalls() ?: return
         for (call in calls) {
@@ -239,15 +246,23 @@ open class OkHttpKineClient : KineClient {
                 requestBody.multiPartParams.apply {
                     for ((key, stringBody) in this.entries) {
                         val mediaType: MediaType? = stringBody.contentType?.toMediaTypeOrNull()
-                        builder.addFormDataPart(key,null,stringBody.value.toRequestBody(mediaType))
+                        builder.addFormDataPart(
+                            key,
+                            null,
+                            stringBody.value.toRequestBody(mediaType)
+                        )
                     }
                 }
                 for ((key, fileBodies) in requestBody.multiPartFileParams.entries) {
                     for (fileBody in fileBodies) {
                         val fileName: String = fileBody.value.name
                         val mediaType: MediaType? = fileBody.contentType?.toMediaTypeOrNull()
-                            ?:fileName.getMimeType().toMediaTypeOrNull()
-                        builder.addFormDataPart(key,fileName,fileBody.value.asRequestBody(mediaType))
+                            ?: fileName.getMimeType().toMediaTypeOrNull()
+                        builder.addFormDataPart(
+                            key,
+                            fileName,
+                            fileBody.value.asRequestBody(mediaType)
+                        )
                     }
                 }
                 builder.build()

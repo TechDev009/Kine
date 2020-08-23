@@ -1,8 +1,7 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package com.kine.android.converters
+package com.kine.converters
 
-import com.kine.converters.RawResponseConverter
 import com.kine.request.Request
 import org.json.JSONArray
 import org.json.JSONObject

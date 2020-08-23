@@ -1,5 +1,7 @@
 package com.kine.log
 
+import com.kine.extensions.getClassInstance
+
 
 /**
  * Helper class for logging.
@@ -10,14 +12,9 @@ object Logger  {
     private var localLevel = LogLevel.NO_LEVEL
     private var log:Log= getDefaultLogger()
 
-    private const val androidExecutorClass = "com.kine.android.log.Log"
+    private const val androidLoggerClass = "com.kine.android.log.Log"
     private fun getDefaultLogger(): Log {
-        return try {
-            Class.forName(androidExecutorClass).newInstance() as Log
-        } catch (exception: ClassNotFoundException) {
-            exception.printStackTrace()
-            JavaLog()
-        }
+        return androidLoggerClass.getClassInstance(JavaLog())
     }
     fun setLevel(level: Int) {
         if (level != LogLevel.NO_LEVEL) {

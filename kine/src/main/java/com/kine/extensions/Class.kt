@@ -7,7 +7,7 @@ internal fun <T> String.getClassInstanceOrNull(): T? {
     return try {
         Class.forName(this).newInstance() as T
     }catch (exception: ClassNotFoundException) {
-        exception.printStackTrace()
+    //    exception.printStackTrace()
         null
     }
 }

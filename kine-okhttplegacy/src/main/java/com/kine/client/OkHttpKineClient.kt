@@ -62,8 +62,12 @@ open class OkHttpKineClient : KineClient {
                     // Request customization: add request headers
                     val requestBuilder = request.newBuilder()
                         .headers(request.headers())
+                        .tag(request.tag())
+                        .cacheControl(request.cacheControl())
+                        .url(request.url())
                         .method(request.method(), request.body())
                     val newRequest = requestBuilder.build()
+                    response.body()?.close()
                     // retry the request
                     response = chain.proceed(newRequest)
                 }
@@ -176,7 +180,10 @@ open class OkHttpKineClient : KineClient {
                 body.source()
             }
             else -> {
-                throw com.kine.exceptions.ParseException("unexpected response format")
+                body.string().apply {
+                    Logger.d(TAG, "onResponse String: $this")
+                }
+              //  throw com.kine.exceptions.ParseException("unexpected response format")
             }
         }
         @Suppress("UNCHECKED_CAST")

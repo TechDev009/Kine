@@ -1,3 +1,5 @@
+include ':kine-json'
+include ':kine-livedata'
 include ':kine-okhttplegacy'
 include ':kine-rxjava3'
 include ':kine-coroutine'

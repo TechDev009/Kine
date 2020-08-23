@@ -80,7 +80,9 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
         }
         return RequestManager.executeRequest(buildRequest(), clazz)
     }
-
+    fun <F> execute(clazz: Class<F>): KineResponse<F>? {
+        return execute(DefaultKineClass(clazz))
+    }
     private fun buildRequest(): Request {
         return if (file != null && progressListener != null) {
             DownloadRequest(
@@ -127,7 +129,9 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
             )
         }
     }
-
+    fun <F> execute(clazz: Class<F>, onSuccess: OnSuccess<F>?, onError: OnError?) {
+        return execute(DefaultKineClass(clazz),onSuccess, onError)
+    }
     fun <F> execute(clazz: KineClass<F>, onSuccess: OnSuccess<F>?, onError: OnError?) {
         if (reqTAG == null) {
             reqTAG = requestUrl
@@ -466,7 +470,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
         var priority: Priority = Priority.IMMEDIATE
         var headers: HashMap<String, String?>? = null
         var executor: Executor = KineExecutorManager.executorSupplier.forNetworkTasks()
-        var requestBody: RequestBody? = SimpleRequestBody()
+        var requestBody: RequestBody?=null
         var queryParams: HashMap<String, String?>? = null
         var logLevel = LogLevel.NO_LEVEL
         var file: File? = null
