@@ -57,7 +57,7 @@ dependencies {
 }
 ```
 
-##### Note: Kine will autodetect if android,okhttp,gson or moshi dependency are there and set appropriate client, converter or main thread callback you don't need to specify them,if both moshi and gson are there, kine will add moshi first(converter are always called by add order so if you both dependency and trying to parse it using gson it won't work). To override this behaviour you can set them using `Kine.builder()` as shown below
+##### Note: Kine will autodetect if android,okhttp,gson or moshi dependency are there and set appropriate client, converter or main thread callback you don't need to specify them,if both moshi and gson are there, kine will add moshi first(converter are always called by add order so if you have both dependency and trying to parse it using gson it won't work). To override this behaviour you can set them using `Kine.builder()` as shown below
 
 ## Usage
 
