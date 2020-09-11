@@ -83,12 +83,12 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
     fun <F> execute(clazz: Class<F>): KineResponse<F>? {
         return execute(DefaultKineClass(clazz))
     }
-    private fun buildRequest(): Request {
+    private fun buildRequest(): RequestFields {
         return if (file != null && progressListener != null) {
-            DownloadRequest(
+            DownloadRequestFields(
                 file!!,
                 progressListener!!, kineClient, converter,
-                RequestData(
+                RequestDataFields(
                     reqTAG!!,
                     requestUrl,
                     method,
@@ -101,10 +101,10 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
                 executor
             )
         } else if (requestBody!=null && requestBody is MultiPartRequestBody) {
-            UploadRequest(
+            UploadRequestFields(
                 progressListener,
                 kineClient, converter,
-                RequestData(
+                RequestDataFields(
                     reqTAG!!,
                     requestUrl,
                     method,
@@ -115,9 +115,9 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
                 logLevel, executor
             )
         } else {
-            Request(
+            RequestFields(
                 kineClient, converter,
-                RequestData(
+                RequestDataFields(
                     reqTAG!!,
                     requestUrl,
                     method,
@@ -141,12 +141,12 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
             onError?.invoke(KineError(NoInternetException()))
             return
         }
-        val request: Request = buildRequest()
+        val requestFields: RequestFields = buildRequest()
         KineExecutorManager.executorSupplier.forNetworkTasks()
-            .submit(object : PriorityRunnable(request.priority) {
+            .submit(object : PriorityRunnable(requestFields.priority) {
                 override fun run() {
                     try {
-                        val response = RequestManager.executeRequest(request, clazz)
+                        val response = RequestManager.executeRequest(requestFields, clazz)
                         onCallbackThread {
                             if (response?.body != null) {
                                 onSuccess?.invoke(response)
@@ -233,7 +233,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
         }
     }
 
-    class RequestMultiPartBodyBuilder(url: String = "", method: Int = Method.GET) : RequestBuilder(url, method) {
+    class RequestMultiPartBodyBuilder(url: String = "", method: Int = Method.POST) : RequestBuilder(url, method) {
         init {
             requestBody = MultiPartRequestBody()
         }
@@ -244,11 +244,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
         ): RequestMultiPartBodyBuilder {
             requestBody = requestBody ?: MultiPartRequestBody()
             if (requestBody is MultiPartRequestBody) {
-                (this.requestBody!! as MultiPartRequestBody).addMultiPartParam(
-                    key,
-                    value,
-                    contentType
-                )
+                (this.requestBody!! as MultiPartRequestBody).addMultiPartParam(key, value, contentType)
             } else {
                 throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
             }
@@ -262,11 +258,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
         ): RequestMultiPartBodyBuilder {
             requestBody = requestBody ?: MultiPartRequestBody()
             if (requestBody is MultiPartRequestBody) {
-                (this.requestBody!! as MultiPartRequestBody).addMultiPartFileParam(
-                    key,
-                    value,
-                    contentType
-                )
+                (this.requestBody!! as MultiPartRequestBody).addMultiPartFileParam(key, value, contentType)
             } else {
                 throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
             }
@@ -279,8 +271,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
         ): RequestMultiPartBodyBuilder {
             requestBody = requestBody ?: MultiPartRequestBody()
             if (requestBody is MultiPartRequestBody) {
-                (this.requestBody!! as MultiPartRequestBody)
-                    .addMultiPartParams(parts, contentType)
+                (this.requestBody!! as MultiPartRequestBody).addMultiPartParams(parts, contentType)
             } else {
                 throw IllegalArgumentException("Only one type of params is allowed per request either STRING,ENCODED,MULTIPART or any other")
             }
@@ -451,7 +442,7 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
 
         fun method(url: String, method: Int): RequestOptionsBuilder
 
-        fun upload(url: String): RequestMultiPartBodyBuilder
+        fun upload(url: String, method: Int = Method.POST): RequestMultiPartBodyBuilder
     }
 
     /**
@@ -663,8 +654,8 @@ open class KineRequest private constructor(requestBuilder: RequestBuilder) {
                 RequestBuilder(url, method) else RequestEncodedBodyBuilder(url, method)
         }
 
-        override fun upload(url: String): RequestMultiPartBodyBuilder {
-            return RequestMultiPartBodyBuilder(url, Method.POST)
+        override fun upload(url: String,method:Int): RequestMultiPartBodyBuilder {
+            return RequestMultiPartBodyBuilder(url, method)
         }
     }
 }

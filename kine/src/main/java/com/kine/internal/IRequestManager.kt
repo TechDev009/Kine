@@ -1,7 +1,7 @@
 
 package com.kine.internal
 
-import com.kine.request.Request
+import com.kine.request.RequestFields
 import com.kine.response.KineResponse
 
 /**
@@ -9,5 +9,5 @@ import com.kine.response.KineResponse
  */
 internal interface IRequestManager {
 
-    fun <F> executeRequest(request: Request, clazz: KineClass<F>):KineResponse<F>?
+    fun <F> executeRequest(requestFields: RequestFields, clazz: KineClass<F>):KineResponse<F>?
 }

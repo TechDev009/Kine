@@ -10,7 +10,7 @@ import com.kine.log.Logger.w
 import com.kine.policies.DefaultRetryPolicy
 import com.kine.policies.RetryPolicy
 import com.kine.request.*
-import com.kine.request.Request
+import com.kine.request.RequestFields
 import com.kine.request.RequestBody
 import com.kine.response.KineResponse
 import okhttp3.*
@@ -59,7 +59,7 @@ open class OkHttpKineClient : KineClient {
                 while (!response.isSuccessful && tryCount < retryPolicy.getRetryCount()) {
                     w("intercept", "Request is not successful - $tryCount")
                     tryCount++
-                    // Request customization: add request headers
+                    // RequestFields customization: add request headers
                     val requestBuilder = request.newBuilder()
                         .headers(request.headers())
                         .tag(request.tag())
@@ -80,25 +80,25 @@ open class OkHttpKineClient : KineClient {
         return method <= KineRequest.Method.PATCH
     }
 
-    override fun <T> execute(request: Request, clazz: Class<T>): KineResponse<T> {
-        Logger.d(TAG, "Tag:${request.data.reqTAG}")
-        Logger.d(TAG, "${request.data.reqTAG} request Url: ${request.data.url}")
-        Logger.d(TAG, "${request.data.reqTAG} request Header: ${request.data.headers}")
+    override fun <T> execute(requestFields: RequestFields, clazz: Class<T>): KineResponse<T> {
+        Logger.d(TAG, "Tag:${requestFields.dataFields.reqTAG}")
+        Logger.d(TAG, "${requestFields.dataFields.reqTAG} request Url: ${requestFields.dataFields.url}")
+        Logger.d(TAG, "${requestFields.dataFields.reqTAG} request Header: ${requestFields.dataFields.headers}")
         val builder = okhttp3.Request.Builder()
-            .url(request.data.url)
-            .tag(request.data.reqTAG)
-        request.data.headers?.apply {
+            .url(requestFields.dataFields.url)
+            .tag(requestFields.dataFields.reqTAG)
+        requestFields.dataFields.headers?.apply {
             for ((key1, value) in this) {
                 builder.addHeader(key1, value ?: "")
             }
         }
-        val requestBody = if(request is UploadRequest){
-            FileProgressRequestBody(getRequestBody(request.data.body),request.progressListener)
+        val requestBody = if(requestFields is UploadRequestFields){
+            FileProgressRequestBody(getRequestBody(requestFields.dataFields.body),requestFields.progressListener)
         }else{
-            getRequestBody(request.data.body)
+            getRequestBody(requestFields.dataFields.body)
         }
-        Logger.d(TAG, "${request.data.reqTAG} request Json Params: ${requestBody.contentType()}")
-        when (request.data.method) {
+        Logger.d(TAG, "${requestFields.dataFields.reqTAG} request Json Params: ${requestBody.contentType()}")
+        when (requestFields.dataFields.method) {
             KineRequest.Method.GET -> builder.get()
             KineRequest.Method.POST -> builder.post(requestBody)
             KineRequest.Method.DELETE -> builder.delete(requestBody)
@@ -111,7 +111,7 @@ open class OkHttpKineClient : KineClient {
                 )
             }
         }
-        val cacheControl = when (request.kineCacheControl.networkPolicy) {
+        val cacheControl = when (requestFields.kineCacheControl.networkPolicy) {
             com.kine.cache.KineCacheControl.FORCE_CACHE -> {
                 CacheControl.FORCE_CACHE
             }
@@ -126,7 +126,7 @@ open class OkHttpKineClient : KineClient {
             }
             com.kine.cache.KineCacheControl.CACHE_FOR_TIME -> {
                 CacheControl.Builder()
-                    .maxAge(request.kineCacheControl.cacheMaxAge, request.kineCacheControl.timeUnit)
+                    .maxAge(requestFields.kineCacheControl.cacheMaxAge, requestFields.kineCacheControl.timeUnit)
                     .build()
             }
             else -> null
@@ -134,14 +134,14 @@ open class OkHttpKineClient : KineClient {
         cacheControl?.apply {
             builder.cacheControl(this)
         }
-        request.retryPolicy?.let {
+        requestFields.retryPolicy?.let {
             if (!it.isSame(retryPolicy)) {
                 createClient(it)
             }
         }
         val response = client!!.newCall(builder.build()).execute()
         if (!response.isSuccessful) {
-            Logger.e(TAG, request.data.reqTAG + " onErrorResponse >> errorCode: " + response.code())
+            Logger.e(TAG, requestFields.dataFields.reqTAG + " onErrorResponse >> errorCode: " + response.code())
             throw HttpStatusCodeException(code = response.code())
         }
         val body: ResponseBody? = response.body()
@@ -159,8 +159,8 @@ open class OkHttpKineClient : KineClient {
             i++
         }
         val responseValue: Any? = when {
-            clazz.isAssignableFrom(File::class.java) && request is DownloadRequest -> {
-                request.file.download(body, request.progressListener)
+            clazz.isAssignableFrom(File::class.java) && requestFields is DownloadRequestFields -> {
+                requestFields.file.download(body, requestFields.progressListener)
             }
             clazz.isAssignableFrom(String::class.java) -> {
                 body.string().apply {

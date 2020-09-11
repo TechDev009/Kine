@@ -2,13 +2,13 @@
 
 package com.kine.converters
 
-import com.kine.request.Request
+import com.kine.request.RequestFields
 import okio.BufferedSource
 import okio.ByteString
 
 
 class OkioConverter : RawResponseConverter() {
-    override fun <J> convert(response: Any, request: Request, clazz: Class<J>): J? {
+    override fun <J> convert(response: Any, requestFields: RequestFields, clazz: Class<J>): J? {
         return when {
             response is ByteString && clazz.isAssignableFrom(ByteString::class.java) -> {
                 response as J
@@ -17,7 +17,7 @@ class OkioConverter : RawResponseConverter() {
                 response as J
             }
             else -> {
-                super.convert(response, request, clazz)
+                super.convert(response, requestFields, clazz)
             }
         }
     }

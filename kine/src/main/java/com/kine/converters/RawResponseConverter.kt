@@ -1,12 +1,12 @@
 package com.kine.converters
 
-import com.kine.request.Request
+import com.kine.request.RequestFields
 import java.io.InputStream
 import java.io.Reader
 
 open class RawResponseConverter:Converter {
     @Suppress("UNCHECKED_CAST")
-    override fun <J> convert(response: Any, request: Request, clazz: Class<J>): J? {
+    override fun <J> convert(response: Any, requestFields: RequestFields, clazz: Class<J>): J? {
         return when  {
             response is String && clazz.isAssignableFrom(String::class.java) -> {
                 response as J

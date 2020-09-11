@@ -12,7 +12,7 @@ import com.kine.interceptors.PreNetworkKineInterceptor
 import com.kine.log.Logger.setLocalLevel
 import com.kine.policies.DefaultRetryPolicy
 import com.kine.policies.RetryPolicy
-import com.kine.request.Request
+import com.kine.request.RequestFields
 import com.kine.response.KineResponse
 import com.kine.timer.TimerManager
 import java.io.File
@@ -77,27 +77,27 @@ internal object RequestManager : IRequestManager {
     }
 
     @Suppress("NAME_SHADOWING")
-    override fun <F> executeRequest(request: Request, clazz: KineClass<F>): KineResponse<F>? {
-        setLocalLevel(request.logLevel)
-        if (request.kineCacheControl.networkPolicy == 0) {
-            request.kineCacheControl.networkPolicy = networkPolicy
+    override fun <F> executeRequest(requestFields: RequestFields, clazz: KineClass<F>): KineResponse<F>? {
+        setLocalLevel(requestFields.logLevel)
+        if (requestFields.kineCacheControl.networkPolicy == 0) {
+            requestFields.kineCacheControl.networkPolicy = networkPolicy
         }
         if (!interceptors.isNullOrEmpty()) {
             val result = interceptors?.firstResultOrNull {
-                it.intercept(request, clazz.clazz)
+                it.intercept(requestFields, clazz.clazz)
             }
             if (result?.body != null) {
                 return result
             }
         }
-        if (request.kineClient != null) {
-            if (request.kineClient.canHandleRequest(request.data.url, request.data.method)) {
-                return enqueueRequest(request.kineClient, request, clazz)
+        if (requestFields.kineClient != null) {
+            if (requestFields.kineClient.canHandleRequest(requestFields.dataFields.url, requestFields.dataFields.method)) {
+                return enqueueRequest(requestFields.kineClient, requestFields, clazz)
             } else {
                 throw MisMatchClientException(
                     "the provided kineClient cannot handle " +
-                            "this type of request, please set kineClient that can " +
-                            "handle this type of request" + " " + "by Changing the kineClient.canHandleRequest(url, method) method"
+                            "this type of requestFields, please set kineClient that can " +
+                            "handle this type of requestFields" + " " + "by Changing the kineClient.canHandleRequest(url, method) method"
                 )
             }
         }
@@ -105,8 +105,8 @@ internal object RequestManager : IRequestManager {
             throw NoClientFoundException()
         }
         kineClients?.firstOrNull {
-            it.canHandleRequest(request.data.url, request.data.method).apply {
-                return enqueueRequest(it, request, clazz)
+            it.canHandleRequest(requestFields.dataFields.url, requestFields.dataFields.method).apply {
+                return enqueueRequest(it, requestFields, clazz)
             }
         } ?: throw MisMatchClientException()
         return null
@@ -123,29 +123,29 @@ internal object RequestManager : IRequestManager {
     @Suppress("NAME_SHADOWING")
     private fun <F> enqueueRequest(
         kineClient: KineClient,
-        request: Request,
+        requestFields: RequestFields,
         clazz: KineClass<F>
     ): KineResponse<F>? {
-        val url = request.data.url
+        val url = requestFields.dataFields.url
         if (baseUrl != null) {
             if (!url.contains("://")) {
-                request.data.url = baseUrl + url
+                requestFields.dataFields.url = baseUrl + url
             }
         } else if (url.isEmpty()) {
             throw UrlMalformedException("url is empty")
         } else if (!url.contains("://")) {
             throw UrlMalformedException("baseUrl is not set, either pass full url or set base " + "url")
         }
-        val newHeader = request.data.headers ?: hashMapOf()
+        val newHeader = requestFields.dataFields.headers ?: hashMapOf()
         headers?.let {
             newHeader.putAll(it)
         }
-        request.retryPolicy = request.retryPolicy ?: retryPolicy
-        return addRequest(kineClient, request, clazz)
+        requestFields.retryPolicy = requestFields.retryPolicy ?: retryPolicy
+        return addRequest(kineClient, requestFields, clazz)
     }
 
     private fun <F> addRequest(
-        kineClient: KineClient, request: Request, clazz: KineClass<F>
+        kineClient: KineClient, requestFields: RequestFields, clazz: KineClass<F>
     ): KineResponse<F>? {
         val responseClazz = when {
             clazz.isAssignableFrom(ByteArray::class.java) -> {
@@ -164,18 +164,18 @@ internal object RequestManager : IRequestManager {
                 clazz.clazz
             }
         }
-        val response = kineClient.execute(request, responseClazz)
-        return parseResponse(response, request, clazz)
+        val response = kineClient.execute(requestFields, responseClazz)
+        return parseResponse(response, requestFields, clazz)
     }
 
     private fun <T, F> parseResponse(
-        kineResponse: KineResponse<T>, request: Request, clazz: KineClass<F>
+        kineResponse: KineResponse<T>, requestFields: RequestFields, clazz: KineClass<F>
     ): KineResponse<F>? {
         if (kineResponse.body == null) {
             throw NullResponseException()
         }
         val timer = timerManager.start()
-        val responseValue: F = parseDataToModel(kineResponse.body, request, request.converter, clazz)
+        val responseValue: F = parseDataToModel(kineResponse.body, requestFields, requestFields.converter, clazz)
         val parseResponse = KineResponse(
             responseValue, kineResponse.headers, kineResponse.statusCode,
             kineResponse.networkTimeMs, kineResponse.loadedFrom
@@ -192,19 +192,19 @@ internal object RequestManager : IRequestManager {
     @Throws(Throwable::class)
     private fun <T> parseDataToModel(
         response: Any,
-        request: Request,
+        requestFields: RequestFields,
         converter: Converter?,
         clazz: KineClass<T>
     ): T {
         if (converter != null) {
-            return converter.convert(response, request, clazz.clazz)
+            return converter.convert(response, requestFields, clazz.clazz)
                 ?: throw MisMatchConverterException()
         }
         if (converters.isNullOrEmpty()) {
             throw NoConverterFoundException()
         }
         return converters!!.firstResultOrNull<Converter, T> {
-            it.convert(response, request, clazz.clazz)
+            it.convert(response, requestFields, clazz.clazz)
         } ?: throw MisMatchConverterException()
     }
 

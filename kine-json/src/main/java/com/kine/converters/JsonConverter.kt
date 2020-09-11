@@ -2,13 +2,13 @@
 
 package com.kine.converters
 
-import com.kine.request.Request
+import com.kine.request.RequestFields
 import org.json.JSONArray
 import org.json.JSONObject
 
 
 class JsonConverter : RawResponseConverter() {
-    override fun <J> convert(response: Any, request: Request, clazz: Class<J>): J? {
+    override fun <J> convert(response: Any, requestFields: RequestFields, clazz: Class<J>): J? {
         if (response is String) {
             return when {
                 clazz.isAssignableFrom(String::class.java) -> {
@@ -25,7 +25,7 @@ class JsonConverter : RawResponseConverter() {
                 }
             }
         } else {
-            return super.convert(response, request, clazz)
+            return super.convert(response, requestFields, clazz)
         }
     }
 
