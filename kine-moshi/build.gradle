@@ -9,8 +9,8 @@ tasks.withType(Javadoc).all {
     enabled = false
 }
 
-apply from: 'C:\\Projects\\Kine2\\bintray.gradle'
-apply from: 'C:\\Projects\\Kine2\\publish.gradle'
+apply from: 'https://raw.githubusercontent.com/AnkitAgrawal967/Kine/master/publish.gradle'
+apply from: 'https://raw.githubusercontent.com/AnkitAgrawal967/Kine/master/bintray.gradle'
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
