@@ -7,6 +7,8 @@
 
 A simple and powerful HTTP networking library for Kotlin/Android.
 
+Medium Blog on it here : https://medium.com/@ankit9673/kine-networking-in-2020-ae83bdc686b3  and same on my blog : https://makingmoneyfromonline.com/2020/08/23/kine-networking-in-2020/
+
 ## Features
 
 - [x] Supports HTTP GET/POST/PUT/DELETE/HEAD/PATCH
@@ -19,7 +21,7 @@ A simple and powerful HTTP networking library for Kotlin/Android.
 - [x] Supports OkHttp with ability to write your own Httpclient
 - [x] Cancel any in-flight request
 - [x] Request timeout with retry policy
-- [x] App Wide Configuration using `Kime` with support for common Headers , base Url for all request
+- [x] App Wide Configuration using `Kine` with support for common Headers , base Url for all request
 - [x] Log manager with option to turn logging off for per request and App wide
 - [x] Supports response deserialization into POJO/POKO with Gson or Moshi
 - [x] Supports reactive programming via RxJava 2.x / RxJava 3.x
