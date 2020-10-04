@@ -8,7 +8,7 @@ ext {
 tasks.withType(Javadoc).all {
     enabled = false
 }
-apply from: 'https://raw.githubusercontent.com/govindsa1011/maven-upload/master/bintray.gradle'
+apply from: 'C:\\Projects\\Kine2\\bintray.gradle'
 apply from: 'C:\\Projects\\Kine2\\publish.gradle'
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])

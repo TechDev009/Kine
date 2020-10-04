@@ -25,8 +25,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    tasks.withType(Javadoc).all {
+        enabled = false
+    }
 }
-
+apply from: 'C:\\Projects\\Kine2\\bintray.gradle'
+apply from: 'C:\\Projects\\Kine2\\publish.gradle'
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"

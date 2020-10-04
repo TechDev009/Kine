@@ -1,0 +1,47 @@
+apply plugin: 'com.jfrog.bintray'
+
+if (project.hasProperty("android")) {
+    apply plugin: 'com.github.dcendents.android-maven'
+}
+
+group = publishedGroupId
+def bintrayUser = ''
+def bintrayApiKey = ''
+def bintrayPassword = ''
+// Bintray
+if (project.rootProject.file('local.properties').exists()) {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    bintrayUser = properties.getProperty("bintray.user")
+    bintrayApiKey = properties.getProperty("bintray.apikey")
+    bintrayPassword = properties.getProperty("bintray.gpg.password")
+} else {
+    bintrayUser = System.getenv("bintrayUser")
+    bintrayApiKey = System.getenv("bintrayApiKey")
+    bintrayPassword = defaultBintrayPassword
+}
+
+bintray {
+    user = bintrayUser
+    key = bintrayApiKey
+    publications = ['MyPublication']
+    configurations = ['archives']
+    pkg {
+        repo = bintrayRepo
+        name = bintrayName
+        desc = libraryDescription
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = allLicenses
+        publish = true
+        publicDownloadNumbers = true
+        version {
+            desc = libraryDescription
+            gpg {
+                sign = true //Determines whether to GPG sign the files. The default is false
+                passphrase = bintrayPassword
+                //Optional. The passphrase for GPG signing'
+            }
+        }
+    }
+}
