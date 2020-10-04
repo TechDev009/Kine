@@ -18,7 +18,7 @@ if (project.rootProject.file('local.properties').exists()) {
 } else {
     bintrayUser = System.getenv("bintrayUser")
     bintrayApiKey = System.getenv("bintrayApiKey")
-    bintrayPassword = defaultBintrayPassword
+    bintrayPassword = System.getenv("bintrayApiKey")
 }
 
 bintray {
