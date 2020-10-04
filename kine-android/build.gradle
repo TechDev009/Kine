@@ -49,7 +49,7 @@ android {
         enabled = false
     }
     testOptions {
-        unitTests.returnDefaultValues = true
+        unitTests.returnDefaultValues =  true
     }
 }
 dependencies {
