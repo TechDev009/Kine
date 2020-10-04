@@ -2,10 +2,29 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 ext {
-    PUBLISH_GROUP_ID = 'com.kine'
-    PUBLISH_ARTIFACT_ID = 'kine-android'
-    PUBLISH_VERSION = '1.0.0.0'
+    bintrayRepo = 'Kine'
+    bintrayName = 'kine'
+
+    publishedGroupId = 'com.kine'
+    libraryName = 'Kine'
+    artifact = 'kine-android'
+    libraryDescription = 'A simple and powerful HTTP networking lib for kotlin/Android..'
+    libraryVersion = '1.0.0.1'
+
+    siteUrl = 'https://github.com/AnkitAgrawal967/Kine'
+    gitUrl = 'https://github.com/AnkitAgrawal967/Kine.git'
+    githubRepository= 'AnkitAgrawal967/Kine'
+
+    developerId = 'AnkitAgrawal967'
+    developerName = 'Ankit Agrawal'
+    developerEmail = 'xyz@mail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
 }
+
+apply from: 'https://raw.githubusercontent.com/ktvipin27/RoomInspector/master/library/publish.gradle'
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
@@ -33,8 +52,6 @@ android {
         unitTests.returnDefaultValues = true
     }
 }
-apply from: 'https://raw.githubusercontent.com/govindsa1011/maven-upload/master/bintray.gradle'
-apply from: 'https://raw.githubusercontent.com/govindsa1011/maven-upload/master/publications.gradle'
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
