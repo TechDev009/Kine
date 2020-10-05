@@ -44,6 +44,6 @@ jobs:
 
       - name: Publish library
         env:
-          bintrayUser: ${{ secrets.BINTRAY_USER }}
-          bintrayApiKey: ${{ secrets.BINTRAY_API_KEY }}
+          bintrayUser: ${{ secrets.BINTRAYUSERNAME }}
+          bintrayApiKey: ${{ secrets.BINTRAYAPIKEY }}
         run: gradle bintrayUpload
