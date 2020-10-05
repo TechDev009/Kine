@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+
 ext {
     bintrayRepo = 'Kine'
     bintrayName = 'kine'
@@ -9,7 +10,7 @@ ext {
     libraryName = 'Kine'
     artifact = 'kine-android'
     libraryDescription = 'A simple and powerful HTTP networking lib for kotlin/Android..'
-    libraryVersion = '1.0.0.1'
+    libraryVersion = '1.0.0.0'
 
     siteUrl = 'https://github.com/AnkitAgrawal967/Kine'
     gitUrl = 'https://github.com/AnkitAgrawal967/Kine.git'
@@ -25,6 +26,7 @@ ext {
 }
 
 apply from: 'https://raw.githubusercontent.com/ktvipin27/RoomInspector/master/library/publish.gradle'
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
