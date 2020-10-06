@@ -46,4 +46,4 @@ jobs:
         env:
           bintrayUser: ${{ secrets.BINTRAYUSERNAME }}
           bintrayApiKey: ${{ secrets.BINTRAYAPIKEY }}
-        run: gradle bintrayUpload
+        run: gradle install bintrayUpload
